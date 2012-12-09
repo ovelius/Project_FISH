@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+option java_package = "fish.finder.proto";
+
+enum MessageType {
+  PING = 0;
+  PONG = 1;
+  SEARCH = 2;
+  RESULTS = 3;
+  TRANSFER = 4;
+}
+
+message Request {
+  required int32 ttl = 1;
+  required MessageType type = 4;
+
+  required fixed64 source = 2;
+  optional fixed64 destination = 3;
+
+  optional string data = 5;
+}
