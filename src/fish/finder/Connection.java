@@ -1,6 +1,7 @@
 package fish.finder;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class Connection implements Runnable {
   public static boolean DEBUG = false;
   public static final int DEFAULT_TTL = 5;
   public static final long BROADCAST = -1L;
+  public static final long NULL_ADRESS = 0L;
 
   private Client client;
   private Socket socket;
@@ -64,13 +66,13 @@ public class Connection implements Runnable {
       open = false;
     }
   }
-  
+
   private void success() {
     open = true;
     client.getRoute().addConnection(this);
     new Thread(this).start();
   }
-  
+
   public void close() throws IOException {
     open = false;
     socket.close();
@@ -88,14 +90,19 @@ public class Connection implements Runnable {
     return socket.getPort();
   }
 
-  public synchronized void send(Request r) {
+  public void send(Request r) {
     try {
-      if (DEBUG) {
-        System.out.println(toString() + ": Sending: \n" + r.toString());
+      OutputStream out = socket.getOutputStream();
+      synchronized (out) {
+        if (DEBUG) {
+          System.out.println(toString() + ": Sending: \n" + r.toString());
+        }
+        byte[] b = r.toByteArray();
+        int length = b.length;
+        out.write((length & 0xff00) >> 8);
+        out.write((length & 0x00ff));
+        out.write(b);
       }
-      byte[] b = r.toByteArray();
-      socket.getOutputStream().write(b.length);
-      socket.getOutputStream().write(b);
     } catch (IOException e) {
       open = false;
     }
@@ -103,16 +110,19 @@ public class Connection implements Runnable {
   
   public synchronized Request readMessage() {
     try {
-      int length = socket.getInputStream().read();
+      int length = (socket.getInputStream().read() << 8) + 
+                   socket.getInputStream().read();
+      if( length < 0) return null;
+
       byte[] b = new byte[length];
       socket.getInputStream().read(b);
       Request r = Request.parseFrom(b);
       if (DEBUG) {
-        System.out.println(toString() + ": ReadMessage: \n" + r.toString());
+        System.out.println(toString() + ": ReadMessage(" + length + "): \n" + 
+                           r.toString());
       }
       return r;
     } catch (IOException e) {
-      e.printStackTrace();
       open = false;
       return null;
     }
@@ -124,9 +134,12 @@ public class Connection implements Runnable {
 
   @Override
   public void run() {
-    while (socket.isClosed() && open) {
+    while (!socket.isClosed() && open) {
       Request message = readMessage();
+      if (message == null) break;
       Request response = null;
+
+      client.getRoute().learn(this, message);
 
       long destination = message.getDestination();
       if (destination != Connection.BROADCAST && 
@@ -149,7 +162,7 @@ public class Connection implements Runnable {
             ArrayList<FileEntry> results = client.search(q);
             SearchResults.Builder resultsBuilder = SearchResults.newBuilder();
             for (int i = 0; i < results.size(); ++i) {
-              resultsBuilder.setResults(i, results.get(i));
+              resultsBuilder.addResults(results.get(i));
             }
             response = client.createRequest(MessageType.RESULTS)
                 .setData(resultsBuilder.build().toByteString())

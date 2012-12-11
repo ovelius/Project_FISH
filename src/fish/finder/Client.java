@@ -40,6 +40,9 @@ public class Client implements Runnable {
   
   private long localIdentity;
 
+  public Client(int port) throws ClassNotFoundException, IOException {
+    this(port, NODE_CACHE);
+  }
   public Client() throws ClassNotFoundException, IOException {
     this(LISTEN_PORT, NODE_CACHE);
   }
@@ -56,7 +59,6 @@ public class Client implements Runnable {
       localIdentity = new Random().nextLong();
     }
 
-
     File fileCache = new File(cacheFile);
     if (fileCache.exists()) {
       ObjectInputStream ois = 
@@ -68,6 +70,10 @@ public class Client implements Runnable {
       ois.close();
     }
     new Thread(this).start();
+  }
+  
+  public Long connectoTo(Client other) throws IOException {
+    return addConnection(other.getListenningIP(), other.getListenningPort());
   }
 
   public Long addConnection(String host, int port) throws IOException {
@@ -140,19 +146,38 @@ public class Client implements Runnable {
     return route;
   }
   
+  public int getListenningPort() {
+    return socket.getLocalPort();
+  }
+  
+  public String getListenningIP()  {
+    return socket.getInetAddress().getHostAddress();
+  }
+
   public Request.Builder createRequest(MessageType type) {
     return Request.newBuilder()
         .setTtl(Connection.DEFAULT_TTL)
         .setSource(getLocalIdentity())
         .setType(type);
   }
-  
+
   public void remoteSearch(String q) {
     searchResults.clear();
     Request r = createRequest(MessageType.SEARCH)
           .setData(ByteString.copyFrom(q.getBytes()))
           .setDestination(Connection.BROADCAST).build();
     route.route(r);
+  }
+
+  public void broadcastPing() {
+    searchResults.clear();
+    Request r = createRequest(MessageType.PING)
+          .setDestination(Connection.BROADCAST).build();
+    route.route(r);
+  }
+
+  public ArrayList<FileEntry> getSearchResults() {
+    return this.searchResults;
   }
   
   public synchronized void addResults(SearchResults results) {
