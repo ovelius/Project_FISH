@@ -10,6 +10,10 @@ import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.google.protobuf.ByteString;
+
+import fish.finder.proto.Message.FileEntry;
+
 public class Index {
 
   private HashMap<String, FileEntry> fileNameToEntry = 
@@ -26,6 +30,7 @@ public class Index {
       for (String fileName : search.get(key)) {
         results.add(fileNameToEntry.get(fileName));
       }
+      if (results.size() > 10) break;
     }
     return results;
   }
@@ -45,7 +50,7 @@ public class Index {
     current.add(f.getAbsolutePath());
   }
   
-  private String addFile(File f) {
+  private ByteString addFile(File f) {
     try {
       if (f.exists() && f.canRead()) {
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -56,8 +61,7 @@ public class Index {
         finally {
           is.close();
         }
-        byte[] digest = md.digest();
-        return new String(digest);
+        return ByteString.copyFrom(md.digest());
       }
     } catch (Exception e) {
       System.err.println("Could not add file: " + f.getAbsolutePath());
@@ -74,10 +78,13 @@ public class Index {
         if (in.isDirectory()) {
           addDirectory(in.getAbsolutePath());
         } else {
-          String hash = addFile(in);
-          long size = in.length();
-          fileNameToEntry.put(in.getAbsolutePath(),
-                              new FileEntry(in.getAbsolutePath(), hash, size));
+          ByteString hash = addFile(in);
+          FileEntry entry = FileEntry.newBuilder()
+              .setSize(in.length())
+              .setName(in.getName())
+              .setHash(hash)
+              .build();
+          fileNameToEntry.put(in.getAbsolutePath(), entry);
           addToIndex(in);
         }
       }

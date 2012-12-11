@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import fish.finder.FileEntry;
+import fish.finder.proto.Message.FileEntry;
 import fish.finder.Index;
 
 public class TestIndex {

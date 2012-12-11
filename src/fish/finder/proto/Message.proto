@@ -12,10 +12,20 @@ enum MessageType {
 
 message Request {
   required int32 ttl = 1;
-  required MessageType type = 4;
+  required MessageType type = 2;
 
-  required fixed64 source = 2;
-  optional fixed64 destination = 3;
+  required fixed64 source = 3;
+  optional fixed64 destination = 4;
 
-  optional string data = 5;
+  optional bytes data = 5;
+}
+
+message SearchResults {
+  repeated FileEntry results = 1;
+}
+
+message FileEntry {
+  required string name = 1;
+  required bytes hash = 2;
+  required int64 size = 3;
 }

@@ -93,21 +93,21 @@ public final class Message {
     boolean hasTtl();
     int getTtl();
     
-    // required .MessageType type = 4;
+    // required .MessageType type = 2;
     boolean hasType();
     fish.finder.proto.Message.MessageType getType();
     
-    // required fixed64 source = 2;
+    // required fixed64 source = 3;
     boolean hasSource();
     long getSource();
     
-    // optional fixed64 destination = 3;
+    // optional fixed64 destination = 4;
     boolean hasDestination();
     long getDestination();
     
-    // optional string data = 5;
+    // optional bytes data = 5;
     boolean hasData();
-    String getData();
+    com.google.protobuf.ByteString getData();
   }
   public static final class Request extends
       com.google.protobuf.GeneratedMessage
@@ -148,8 +148,8 @@ public final class Message {
       return ttl_;
     }
     
-    // required .MessageType type = 4;
-    public static final int TYPE_FIELD_NUMBER = 4;
+    // required .MessageType type = 2;
+    public static final int TYPE_FIELD_NUMBER = 2;
     private fish.finder.proto.Message.MessageType type_;
     public boolean hasType() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
@@ -158,8 +158,8 @@ public final class Message {
       return type_;
     }
     
-    // required fixed64 source = 2;
-    public static final int SOURCE_FIELD_NUMBER = 2;
+    // required fixed64 source = 3;
+    public static final int SOURCE_FIELD_NUMBER = 3;
     private long source_;
     public boolean hasSource() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
@@ -168,8 +168,8 @@ public final class Message {
       return source_;
     }
     
-    // optional fixed64 destination = 3;
-    public static final int DESTINATION_FIELD_NUMBER = 3;
+    // optional fixed64 destination = 4;
+    public static final int DESTINATION_FIELD_NUMBER = 4;
     private long destination_;
     public boolean hasDestination() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
@@ -178,36 +178,14 @@ public final class Message {
       return destination_;
     }
     
-    // optional string data = 5;
+    // optional bytes data = 5;
     public static final int DATA_FIELD_NUMBER = 5;
-    private java.lang.Object data_;
+    private com.google.protobuf.ByteString data_;
     public boolean hasData() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
-    public String getData() {
-      java.lang.Object ref = data_;
-      if (ref instanceof String) {
-        return (String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-          data_ = s;
-        }
-        return s;
-      }
-    }
-    private com.google.protobuf.ByteString getDataBytes() {
-      java.lang.Object ref = data_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-        data_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.google.protobuf.ByteString getData() {
+      return data_;
     }
     
     private void initFields() {
@@ -215,7 +193,7 @@ public final class Message {
       type_ = fish.finder.proto.Message.MessageType.PING;
       source_ = 0L;
       destination_ = 0L;
-      data_ = "";
+      data_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -244,17 +222,17 @@ public final class Message {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeInt32(1, ttl_);
       }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeEnum(2, type_.getNumber());
+      }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeFixed64(2, source_);
+        output.writeFixed64(3, source_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeFixed64(3, destination_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeEnum(4, type_.getNumber());
+        output.writeFixed64(4, destination_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBytes(5, getDataBytes());
+        output.writeBytes(5, data_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -269,21 +247,21 @@ public final class Message {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, ttl_);
       }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, type_.getNumber());
+      }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeFixed64Size(2, source_);
+          .computeFixed64Size(3, source_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeFixed64Size(3, destination_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(4, type_.getNumber());
+          .computeFixed64Size(4, destination_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(5, getDataBytes());
+          .computeBytesSize(5, data_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -417,7 +395,7 @@ public final class Message {
         bitField0_ = (bitField0_ & ~0x00000004);
         destination_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
-        data_ = "";
+        data_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
@@ -556,25 +534,25 @@ public final class Message {
               ttl_ = input.readInt32();
               break;
             }
-            case 17: {
-              bitField0_ |= 0x00000004;
-              source_ = input.readFixed64();
-              break;
-            }
-            case 25: {
-              bitField0_ |= 0x00000008;
-              destination_ = input.readFixed64();
-              break;
-            }
-            case 32: {
+            case 16: {
               int rawValue = input.readEnum();
               fish.finder.proto.Message.MessageType value = fish.finder.proto.Message.MessageType.valueOf(rawValue);
               if (value == null) {
-                unknownFields.mergeVarintField(4, rawValue);
+                unknownFields.mergeVarintField(2, rawValue);
               } else {
                 bitField0_ |= 0x00000002;
                 type_ = value;
               }
+              break;
+            }
+            case 25: {
+              bitField0_ |= 0x00000004;
+              source_ = input.readFixed64();
+              break;
+            }
+            case 33: {
+              bitField0_ |= 0x00000008;
+              destination_ = input.readFixed64();
               break;
             }
             case 42: {
@@ -609,7 +587,7 @@ public final class Message {
         return this;
       }
       
-      // required .MessageType type = 4;
+      // required .MessageType type = 2;
       private fish.finder.proto.Message.MessageType type_ = fish.finder.proto.Message.MessageType.PING;
       public boolean hasType() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
@@ -633,7 +611,7 @@ public final class Message {
         return this;
       }
       
-      // required fixed64 source = 2;
+      // required fixed64 source = 3;
       private long source_ ;
       public boolean hasSource() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
@@ -654,7 +632,7 @@ public final class Message {
         return this;
       }
       
-      // optional fixed64 destination = 3;
+      // optional fixed64 destination = 4;
       private long destination_ ;
       public boolean hasDestination() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
@@ -675,22 +653,15 @@ public final class Message {
         return this;
       }
       
-      // optional string data = 5;
-      private java.lang.Object data_ = "";
+      // optional bytes data = 5;
+      private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       public boolean hasData() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
-      public String getData() {
-        java.lang.Object ref = data_;
-        if (!(ref instanceof String)) {
-          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-          data_ = s;
-          return s;
-        } else {
-          return (String) ref;
-        }
+      public com.google.protobuf.ByteString getData() {
+        return data_;
       }
-      public Builder setData(String value) {
+      public Builder setData(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -705,11 +676,6 @@ public final class Message {
         onChanged();
         return this;
       }
-      void setData(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000010;
-        data_ = value;
-        onChanged();
-      }
       
       // @@protoc_insertion_point(builder_scope:Request)
     }
@@ -722,11 +688,1100 @@ public final class Message {
     // @@protoc_insertion_point(class_scope:Request)
   }
   
+  public interface SearchResultsOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+    
+    // repeated .FileEntry results = 1;
+    java.util.List<fish.finder.proto.Message.FileEntry> 
+        getResultsList();
+    fish.finder.proto.Message.FileEntry getResults(int index);
+    int getResultsCount();
+    java.util.List<? extends fish.finder.proto.Message.FileEntryOrBuilder> 
+        getResultsOrBuilderList();
+    fish.finder.proto.Message.FileEntryOrBuilder getResultsOrBuilder(
+        int index);
+  }
+  public static final class SearchResults extends
+      com.google.protobuf.GeneratedMessage
+      implements SearchResultsOrBuilder {
+    // Use SearchResults.newBuilder() to construct.
+    private SearchResults(Builder builder) {
+      super(builder);
+    }
+    private SearchResults(boolean noInit) {}
+    
+    private static final SearchResults defaultInstance;
+    public static SearchResults getDefaultInstance() {
+      return defaultInstance;
+    }
+    
+    public SearchResults getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+    
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return fish.finder.proto.Message.internal_static_SearchResults_descriptor;
+    }
+    
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return fish.finder.proto.Message.internal_static_SearchResults_fieldAccessorTable;
+    }
+    
+    // repeated .FileEntry results = 1;
+    public static final int RESULTS_FIELD_NUMBER = 1;
+    private java.util.List<fish.finder.proto.Message.FileEntry> results_;
+    public java.util.List<fish.finder.proto.Message.FileEntry> getResultsList() {
+      return results_;
+    }
+    public java.util.List<? extends fish.finder.proto.Message.FileEntryOrBuilder> 
+        getResultsOrBuilderList() {
+      return results_;
+    }
+    public int getResultsCount() {
+      return results_.size();
+    }
+    public fish.finder.proto.Message.FileEntry getResults(int index) {
+      return results_.get(index);
+    }
+    public fish.finder.proto.Message.FileEntryOrBuilder getResultsOrBuilder(
+        int index) {
+      return results_.get(index);
+    }
+    
+    private void initFields() {
+      results_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+      
+      for (int i = 0; i < getResultsCount(); i++) {
+        if (!getResults(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+    
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < results_.size(); i++) {
+        output.writeMessage(1, results_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+    
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+    
+      size = 0;
+      for (int i = 0; i < results_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, results_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+    
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+    
+    public static fish.finder.proto.Message.SearchResults parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static fish.finder.proto.Message.SearchResults parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static fish.finder.proto.Message.SearchResults parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static fish.finder.proto.Message.SearchResults parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static fish.finder.proto.Message.SearchResults parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static fish.finder.proto.Message.SearchResults parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    public static fish.finder.proto.Message.SearchResults parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static fish.finder.proto.Message.SearchResults parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static fish.finder.proto.Message.SearchResults parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static fish.finder.proto.Message.SearchResults parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(fish.finder.proto.Message.SearchResults prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+    
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements fish.finder.proto.Message.SearchResultsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return fish.finder.proto.Message.internal_static_SearchResults_descriptor;
+      }
+      
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return fish.finder.proto.Message.internal_static_SearchResults_fieldAccessorTable;
+      }
+      
+      // Construct using fish.finder.proto.Message.SearchResults.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+      
+      private Builder(BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getResultsFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+      
+      public Builder clear() {
+        super.clear();
+        if (resultsBuilder_ == null) {
+          results_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          resultsBuilder_.clear();
+        }
+        return this;
+      }
+      
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+      
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return fish.finder.proto.Message.SearchResults.getDescriptor();
+      }
+      
+      public fish.finder.proto.Message.SearchResults getDefaultInstanceForType() {
+        return fish.finder.proto.Message.SearchResults.getDefaultInstance();
+      }
+      
+      public fish.finder.proto.Message.SearchResults build() {
+        fish.finder.proto.Message.SearchResults result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+      
+      private fish.finder.proto.Message.SearchResults buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        fish.finder.proto.Message.SearchResults result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
+      public fish.finder.proto.Message.SearchResults buildPartial() {
+        fish.finder.proto.Message.SearchResults result = new fish.finder.proto.Message.SearchResults(this);
+        int from_bitField0_ = bitField0_;
+        if (resultsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            results_ = java.util.Collections.unmodifiableList(results_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.results_ = results_;
+        } else {
+          result.results_ = resultsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+      
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof fish.finder.proto.Message.SearchResults) {
+          return mergeFrom((fish.finder.proto.Message.SearchResults)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+      
+      public Builder mergeFrom(fish.finder.proto.Message.SearchResults other) {
+        if (other == fish.finder.proto.Message.SearchResults.getDefaultInstance()) return this;
+        if (resultsBuilder_ == null) {
+          if (!other.results_.isEmpty()) {
+            if (results_.isEmpty()) {
+              results_ = other.results_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureResultsIsMutable();
+              results_.addAll(other.results_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.results_.isEmpty()) {
+            if (resultsBuilder_.isEmpty()) {
+              resultsBuilder_.dispose();
+              resultsBuilder_ = null;
+              results_ = other.results_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              resultsBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getResultsFieldBuilder() : null;
+            } else {
+              resultsBuilder_.addAllMessages(other.results_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+      
+      public final boolean isInitialized() {
+        for (int i = 0; i < getResultsCount(); i++) {
+          if (!getResults(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+      
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              fish.finder.proto.Message.FileEntry.Builder subBuilder = fish.finder.proto.Message.FileEntry.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addResults(subBuilder.buildPartial());
+              break;
+            }
+          }
+        }
+      }
+      
+      private int bitField0_;
+      
+      // repeated .FileEntry results = 1;
+      private java.util.List<fish.finder.proto.Message.FileEntry> results_ =
+        java.util.Collections.emptyList();
+      private void ensureResultsIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          results_ = new java.util.ArrayList<fish.finder.proto.Message.FileEntry>(results_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      
+      private com.google.protobuf.RepeatedFieldBuilder<
+          fish.finder.proto.Message.FileEntry, fish.finder.proto.Message.FileEntry.Builder, fish.finder.proto.Message.FileEntryOrBuilder> resultsBuilder_;
+      
+      public java.util.List<fish.finder.proto.Message.FileEntry> getResultsList() {
+        if (resultsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(results_);
+        } else {
+          return resultsBuilder_.getMessageList();
+        }
+      }
+      public int getResultsCount() {
+        if (resultsBuilder_ == null) {
+          return results_.size();
+        } else {
+          return resultsBuilder_.getCount();
+        }
+      }
+      public fish.finder.proto.Message.FileEntry getResults(int index) {
+        if (resultsBuilder_ == null) {
+          return results_.get(index);
+        } else {
+          return resultsBuilder_.getMessage(index);
+        }
+      }
+      public Builder setResults(
+          int index, fish.finder.proto.Message.FileEntry value) {
+        if (resultsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResultsIsMutable();
+          results_.set(index, value);
+          onChanged();
+        } else {
+          resultsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      public Builder setResults(
+          int index, fish.finder.proto.Message.FileEntry.Builder builderForValue) {
+        if (resultsBuilder_ == null) {
+          ensureResultsIsMutable();
+          results_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          resultsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      public Builder addResults(fish.finder.proto.Message.FileEntry value) {
+        if (resultsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResultsIsMutable();
+          results_.add(value);
+          onChanged();
+        } else {
+          resultsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      public Builder addResults(
+          int index, fish.finder.proto.Message.FileEntry value) {
+        if (resultsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResultsIsMutable();
+          results_.add(index, value);
+          onChanged();
+        } else {
+          resultsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      public Builder addResults(
+          fish.finder.proto.Message.FileEntry.Builder builderForValue) {
+        if (resultsBuilder_ == null) {
+          ensureResultsIsMutable();
+          results_.add(builderForValue.build());
+          onChanged();
+        } else {
+          resultsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      public Builder addResults(
+          int index, fish.finder.proto.Message.FileEntry.Builder builderForValue) {
+        if (resultsBuilder_ == null) {
+          ensureResultsIsMutable();
+          results_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          resultsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      public Builder addAllResults(
+          java.lang.Iterable<? extends fish.finder.proto.Message.FileEntry> values) {
+        if (resultsBuilder_ == null) {
+          ensureResultsIsMutable();
+          super.addAll(values, results_);
+          onChanged();
+        } else {
+          resultsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      public Builder clearResults() {
+        if (resultsBuilder_ == null) {
+          results_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          resultsBuilder_.clear();
+        }
+        return this;
+      }
+      public Builder removeResults(int index) {
+        if (resultsBuilder_ == null) {
+          ensureResultsIsMutable();
+          results_.remove(index);
+          onChanged();
+        } else {
+          resultsBuilder_.remove(index);
+        }
+        return this;
+      }
+      public fish.finder.proto.Message.FileEntry.Builder getResultsBuilder(
+          int index) {
+        return getResultsFieldBuilder().getBuilder(index);
+      }
+      public fish.finder.proto.Message.FileEntryOrBuilder getResultsOrBuilder(
+          int index) {
+        if (resultsBuilder_ == null) {
+          return results_.get(index);  } else {
+          return resultsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      public java.util.List<? extends fish.finder.proto.Message.FileEntryOrBuilder> 
+           getResultsOrBuilderList() {
+        if (resultsBuilder_ != null) {
+          return resultsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(results_);
+        }
+      }
+      public fish.finder.proto.Message.FileEntry.Builder addResultsBuilder() {
+        return getResultsFieldBuilder().addBuilder(
+            fish.finder.proto.Message.FileEntry.getDefaultInstance());
+      }
+      public fish.finder.proto.Message.FileEntry.Builder addResultsBuilder(
+          int index) {
+        return getResultsFieldBuilder().addBuilder(
+            index, fish.finder.proto.Message.FileEntry.getDefaultInstance());
+      }
+      public java.util.List<fish.finder.proto.Message.FileEntry.Builder> 
+           getResultsBuilderList() {
+        return getResultsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          fish.finder.proto.Message.FileEntry, fish.finder.proto.Message.FileEntry.Builder, fish.finder.proto.Message.FileEntryOrBuilder> 
+          getResultsFieldBuilder() {
+        if (resultsBuilder_ == null) {
+          resultsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              fish.finder.proto.Message.FileEntry, fish.finder.proto.Message.FileEntry.Builder, fish.finder.proto.Message.FileEntryOrBuilder>(
+                  results_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          results_ = null;
+        }
+        return resultsBuilder_;
+      }
+      
+      // @@protoc_insertion_point(builder_scope:SearchResults)
+    }
+    
+    static {
+      defaultInstance = new SearchResults(true);
+      defaultInstance.initFields();
+    }
+    
+    // @@protoc_insertion_point(class_scope:SearchResults)
+  }
+  
+  public interface FileEntryOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+    
+    // required string name = 1;
+    boolean hasName();
+    String getName();
+    
+    // required bytes hash = 2;
+    boolean hasHash();
+    com.google.protobuf.ByteString getHash();
+    
+    // required int64 size = 3;
+    boolean hasSize();
+    long getSize();
+  }
+  public static final class FileEntry extends
+      com.google.protobuf.GeneratedMessage
+      implements FileEntryOrBuilder {
+    // Use FileEntry.newBuilder() to construct.
+    private FileEntry(Builder builder) {
+      super(builder);
+    }
+    private FileEntry(boolean noInit) {}
+    
+    private static final FileEntry defaultInstance;
+    public static FileEntry getDefaultInstance() {
+      return defaultInstance;
+    }
+    
+    public FileEntry getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+    
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return fish.finder.proto.Message.internal_static_FileEntry_descriptor;
+    }
+    
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return fish.finder.proto.Message.internal_static_FileEntry_fieldAccessorTable;
+    }
+    
+    private int bitField0_;
+    // required string name = 1;
+    public static final int NAME_FIELD_NUMBER = 1;
+    private java.lang.Object name_;
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    public String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+    private com.google.protobuf.ByteString getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    
+    // required bytes hash = 2;
+    public static final int HASH_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString hash_;
+    public boolean hasHash() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    public com.google.protobuf.ByteString getHash() {
+      return hash_;
+    }
+    
+    // required int64 size = 3;
+    public static final int SIZE_FIELD_NUMBER = 3;
+    private long size_;
+    public boolean hasSize() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    public long getSize() {
+      return size_;
+    }
+    
+    private void initFields() {
+      name_ = "";
+      hash_ = com.google.protobuf.ByteString.EMPTY;
+      size_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+      
+      if (!hasName()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasHash()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasSize()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+    
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, hash_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, size_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+    
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+    
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, hash_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, size_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+    
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+    
+    public static fish.finder.proto.Message.FileEntry parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static fish.finder.proto.Message.FileEntry parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static fish.finder.proto.Message.FileEntry parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static fish.finder.proto.Message.FileEntry parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static fish.finder.proto.Message.FileEntry parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static fish.finder.proto.Message.FileEntry parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    public static fish.finder.proto.Message.FileEntry parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static fish.finder.proto.Message.FileEntry parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static fish.finder.proto.Message.FileEntry parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static fish.finder.proto.Message.FileEntry parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(fish.finder.proto.Message.FileEntry prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+    
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements fish.finder.proto.Message.FileEntryOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return fish.finder.proto.Message.internal_static_FileEntry_descriptor;
+      }
+      
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return fish.finder.proto.Message.internal_static_FileEntry_fieldAccessorTable;
+      }
+      
+      // Construct using fish.finder.proto.Message.FileEntry.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+      
+      private Builder(BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+      
+      public Builder clear() {
+        super.clear();
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        hash_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        size_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+      
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+      
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return fish.finder.proto.Message.FileEntry.getDescriptor();
+      }
+      
+      public fish.finder.proto.Message.FileEntry getDefaultInstanceForType() {
+        return fish.finder.proto.Message.FileEntry.getDefaultInstance();
+      }
+      
+      public fish.finder.proto.Message.FileEntry build() {
+        fish.finder.proto.Message.FileEntry result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+      
+      private fish.finder.proto.Message.FileEntry buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        fish.finder.proto.Message.FileEntry result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
+      public fish.finder.proto.Message.FileEntry buildPartial() {
+        fish.finder.proto.Message.FileEntry result = new fish.finder.proto.Message.FileEntry(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.name_ = name_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.hash_ = hash_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.size_ = size_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+      
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof fish.finder.proto.Message.FileEntry) {
+          return mergeFrom((fish.finder.proto.Message.FileEntry)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+      
+      public Builder mergeFrom(fish.finder.proto.Message.FileEntry other) {
+        if (other == fish.finder.proto.Message.FileEntry.getDefaultInstance()) return this;
+        if (other.hasName()) {
+          setName(other.getName());
+        }
+        if (other.hasHash()) {
+          setHash(other.getHash());
+        }
+        if (other.hasSize()) {
+          setSize(other.getSize());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+      
+      public final boolean isInitialized() {
+        if (!hasName()) {
+          
+          return false;
+        }
+        if (!hasHash()) {
+          
+          return false;
+        }
+        if (!hasSize()) {
+          
+          return false;
+        }
+        return true;
+      }
+      
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              name_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              hash_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              size_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      }
+      
+      private int bitField0_;
+      
+      // required string name = 1;
+      private java.lang.Object name_ = "";
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      public String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      public Builder setName(String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      void setName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+      }
+      
+      // required bytes hash = 2;
+      private com.google.protobuf.ByteString hash_ = com.google.protobuf.ByteString.EMPTY;
+      public boolean hasHash() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      public com.google.protobuf.ByteString getHash() {
+        return hash_;
+      }
+      public Builder setHash(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        hash_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearHash() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        hash_ = getDefaultInstance().getHash();
+        onChanged();
+        return this;
+      }
+      
+      // required int64 size = 3;
+      private long size_ ;
+      public boolean hasSize() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      public long getSize() {
+        return size_;
+      }
+      public Builder setSize(long value) {
+        bitField0_ |= 0x00000004;
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearSize() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        size_ = 0L;
+        onChanged();
+        return this;
+      }
+      
+      // @@protoc_insertion_point(builder_scope:FileEntry)
+    }
+    
+    static {
+      defaultInstance = new FileEntry(true);
+      defaultInstance.initFields();
+    }
+    
+    // @@protoc_insertion_point(class_scope:FileEntry)
+  }
+  
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_Request_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_Request_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_SearchResults_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_SearchResults_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_FileEntry_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_FileEntry_fieldAccessorTable;
   
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -737,11 +1792,14 @@ public final class Message {
   static {
     java.lang.String[] descriptorData = {
       "\n\037fish/finder/proto/Message.proto\"e\n\007Req" +
-      "uest\022\013\n\003ttl\030\001 \002(\005\022\032\n\004type\030\004 \002(\0162\014.Messag" +
-      "eType\022\016\n\006source\030\002 \002(\006\022\023\n\013destination\030\003 \001" +
-      "(\006\022\014\n\004data\030\005 \001(\t*H\n\013MessageType\022\010\n\004PING\020" +
-      "\000\022\010\n\004PONG\020\001\022\n\n\006SEARCH\020\002\022\013\n\007RESULTS\020\003\022\014\n\010" +
-      "TRANSFER\020\004B\023\n\021fish.finder.proto"
+      "uest\022\013\n\003ttl\030\001 \002(\005\022\032\n\004type\030\002 \002(\0162\014.Messag" +
+      "eType\022\016\n\006source\030\003 \002(\006\022\023\n\013destination\030\004 \001" +
+      "(\006\022\014\n\004data\030\005 \001(\014\",\n\rSearchResults\022\033\n\007res" +
+      "ults\030\001 \003(\0132\n.FileEntry\"5\n\tFileEntry\022\014\n\004n" +
+      "ame\030\001 \002(\t\022\014\n\004hash\030\002 \002(\014\022\014\n\004size\030\003 \002(\003*H\n" +
+      "\013MessageType\022\010\n\004PING\020\000\022\010\n\004PONG\020\001\022\n\n\006SEAR" +
+      "CH\020\002\022\013\n\007RESULTS\020\003\022\014\n\010TRANSFER\020\004B\023\n\021fish." +
+      "finder.proto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -756,6 +1814,22 @@ public final class Message {
               new java.lang.String[] { "Ttl", "Type", "Source", "Destination", "Data", },
               fish.finder.proto.Message.Request.class,
               fish.finder.proto.Message.Request.Builder.class);
+          internal_static_SearchResults_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+          internal_static_SearchResults_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_SearchResults_descriptor,
+              new java.lang.String[] { "Results", },
+              fish.finder.proto.Message.SearchResults.class,
+              fish.finder.proto.Message.SearchResults.Builder.class);
+          internal_static_FileEntry_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_FileEntry_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_FileEntry_descriptor,
+              new java.lang.String[] { "Name", "Hash", "Size", },
+              fish.finder.proto.Message.FileEntry.class,
+              fish.finder.proto.Message.FileEntry.Builder.class);
           return null;
         }
       };
