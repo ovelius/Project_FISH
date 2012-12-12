@@ -10,7 +10,6 @@ import org.junit.After;
 import org.junit.Test;
 
 import fish.finder.Client;
-import fish.finder.Connection;
 import fish.finder.Route;
 
 public class TestRoute {

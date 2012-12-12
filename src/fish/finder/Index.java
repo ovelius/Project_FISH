@@ -16,6 +16,8 @@ import fish.finder.proto.Message.FileEntry;
 
 public class Index {
 
+  public static boolean DEBUG = false;
+
   private HashMap<String, FileEntry> fileNameToEntry = 
       new HashMap<String, FileEntry>();
   private TreeMap<String, ArrayList<String>> searchIndex = 

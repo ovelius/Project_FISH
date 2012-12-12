@@ -20,26 +20,33 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import fish.finder.Client;
+import fish.finder.Connection;
+import fish.finder.Index;
+import fish.finder.Route;
 import fish.finder.proto.Message.FileEntry;
 
 import java.awt.Font;
 import java.io.IOException;
+import javax.swing.JCheckBox;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class GUI extends JFrame implements Runnable {
 
   private Client client;
   private JLabel statusLabel;
+  private JCheckBox debugCheck;
   private DefaultListModel<String> shareList = new DefaultListModel<String>();
-  private DefaultListModel<FileEntry> resultList = new DefaultListModel<FileEntry>();
+  private JList<FileEntry> searchResults;
 
   public GUI() {
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    
+    setBounds(100, 100, 646, 445);
     JPanel panel = new JPanel();
     panel.setToolTipText("");
     getContentPane().add(panel, BorderLayout.CENTER);
     panel.setLayout(null);
-    
+
     final JButton connectionButton = new JButton("Join");
     connectionButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -110,6 +117,7 @@ public class GUI extends JFrame implements Runnable {
         if (client != null) {
           String q = textField.getText();
           client.remoteSearch(q);
+          searchResults.setModel(client.getSearchResults());
         }
       }
     });
@@ -120,7 +128,7 @@ public class GUI extends JFrame implements Runnable {
     lblNewLabel_1.setBounds(10, 389, 89, 14);
     panel.add(lblNewLabel_1);
     
-    JList searchResults = new JList();
+    searchResults = new JList<FileEntry>();
     searchResults.setBounds(235, 122, 357, 256);
     panel.add(searchResults);
     
@@ -133,6 +141,64 @@ public class GUI extends JFrame implements Runnable {
     clientPort.setBounds(131, 37, 62, 20);
     panel.add(clientPort);
     clientPort.setColumns(10);
+    
+    JLabel lblConnectManually = new JLabel("Connect manually:");
+    lblConnectManually.setBounds(203, 40, 95, 14);
+    panel.add(lblConnectManually);
+    
+    nodeName = new JTextField();
+    nodeName.setBounds(297, 37, 86, 20);
+    panel.add(nodeName);
+    nodeName.setColumns(10);
+    
+    JButton connectBtn = new JButton("Connect");
+    connectBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (client != null) {
+          try {
+            client.addConnection(nodeName.getText());
+          } catch (IOException e1) {
+            JOptionPane.showMessageDialog(GUI.this, 
+                "Error connecting to " + nodeName.getText());
+          }
+        }
+      }
+    });
+    connectBtn.setBounds(404, 36, 89, 23);
+    panel.add(connectBtn);
+    
+    debugCheck = new JCheckBox("debug");
+    debugCheck.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent arg0) {
+        boolean debug = debugCheck.isSelected();
+        Client.DEBUG = debug;
+        Connection.DEBUG = debug;
+        Route.DEBUG = debug;
+        Index.DEBUG = debug;
+      }
+    });
+    debugCheck.setBounds(530, 2, 62, 23);
+    panel.add(debugCheck);
+    
+    JButton btnNewButton = new JButton("Network topology");
+    btnNewButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (client != null) {
+          new TopologyMap(client).setVisible(true);
+        }
+      }
+    });
+    btnNewButton.setBounds(405, 2, 119, 23);
+    panel.add(btnNewButton);
+
+    addWindowListener(new java.awt.event.WindowAdapter() {
+      public void windowClosing(java.awt.event.WindowEvent e) {
+          if (client != null) {
+            client.close();
+            client = null;
+          }
+      }
+  });
   }
 
   /**
@@ -141,6 +207,7 @@ public class GUI extends JFrame implements Runnable {
   private static final long serialVersionUID = 1L;
   private JTextField textField;
   private JTextField clientPort;
+  private JTextField nodeName;
 
   @Override
   public void run() {
@@ -148,7 +215,10 @@ public class GUI extends JFrame implements Runnable {
       Client c = client;
       shareList.removeAllElements();
       if (c != null) {
-        this.statusLabel.setText("Status: Connected to " + c.getConnectionCount() + " peers");
+        int directPeers = c.getRoute().directConnections();
+        int peers = c.getRoute().reachableNodes();
+        this.statusLabel.setText("Status: Connected to " + peers + 
+                                 " peers, " + directPeers + " direct");
         for (String dir : c.getSharedDirectories()) {
           shareList.addElement(dir);
         }

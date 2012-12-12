@@ -3,7 +3,6 @@ package fish.finder;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -28,6 +27,10 @@ public class Connection implements Runnable {
 
   public long getRemoteIdentity() {
     return remoteIdentity;
+  }
+
+  public long getLocalIdentity() {
+    return client.getLocalIdentity();
   }
 
   public Connection(Client client, Socket socket) {

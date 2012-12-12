@@ -15,7 +15,7 @@ public class TestConnection {
   public void testClientConnect() throws ClassNotFoundException, IOException {
     Connection.DEBUG = true;
     Client.DEBUG = true;
-    Client c = new Client();
+    Client c = new Client(Client.LISTEN_PORT, "null-file.object");
     Connection connection = new Connection(c, "localhost", Client.LISTEN_PORT);
     assertTrue(connection.isOpen());
     assertTrue(c.getConnectionCount() > 0);

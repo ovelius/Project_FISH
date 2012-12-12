@@ -1,5 +1,7 @@
 package fish.finder;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 import fish.finder.proto.Message.Request;
@@ -7,7 +9,10 @@ import fish.finder.proto.Message.Request;
 public class Route {
 
   public static boolean DEBUG = false;
+
   private HashMap<Long, Long> routes = new HashMap<Long, Long>();
+  private HashMap<Long, Integer> bestRouteTTL = new HashMap<Long, Integer>();
+  
   private HashMap<Long, Connection> idToConnection =
       new HashMap<Long, Connection>();
 
@@ -26,14 +31,46 @@ public class Route {
   public int directConnections() {
     return idToConnection.size();
   }
-  
-  public void learn(Connection connection, Request message) {
-    if (connection.getRemoteIdentity() != message.getSource()) {
-      if (DEBUG) {
-        System.out.println(toString() + ": Added link to: " + 
-            message.getSource() + " via " + connection.getRemoteIdentity()); 
+
+  public int reachableNodes() {
+    return idToConnection.size() + routes.size();
+  }
+
+  public Collection<Connection> getDirectConnections() {
+    return this.idToConnection.values();
+  }
+ 
+  public Collection<Long> getViaPeers(Long peer) {
+    ArrayList<Long> peers = new ArrayList<Long>();
+    for (Long dst : routes.keySet()) {
+      if (routes.get(dst) == peer) {
+        peers.add(dst);
       }
-      routes.put(message.getSource(), connection.getRemoteIdentity());
+    }
+    return peers;
+  }
+
+  public void learn(Connection connection, Request message) {
+    if (connection.getRemoteIdentity() != message.getSource() &&
+        !idToConnection.containsKey(message.getSource())) {
+      if (!routes.containsKey(message.getSource())) {
+        if (DEBUG) {
+          System.out.println(toString() + ": Added link to: " + 
+            message.getSource() + " via " + connection.getRemoteIdentity()); 
+        }
+        routes.put(message.getSource(), connection.getRemoteIdentity());
+        bestRouteTTL.put(message.getSource(), message.getTtl());
+      } else {
+        int ttl = bestRouteTTL.get(message.getSource());
+        if (ttl < message.getTtl()) {
+          if (DEBUG) {
+            System.out.println(toString() + ": Replaced link to: " + 
+              message.getSource() + " via " + connection.getRemoteIdentity()); 
+          }
+          routes.put(message.getSource(), connection.getRemoteIdentity());
+          bestRouteTTL.put(message.getSource(), message.getTtl());
+        }
+      }
     }
   }
 

@@ -16,6 +16,7 @@ import java.util.Random;
 
 import com.google.protobuf.ByteString;
 
+import fish.finder.gui.SearchResultModel;
 import fish.finder.proto.Message.FileEntry;
 import fish.finder.proto.Message.MessageType;
 import fish.finder.proto.Message.Request;
@@ -26,9 +27,8 @@ public class Client implements Runnable {
   public final static int LISTEN_PORT = 9119;
   public final static String NODE_CACHE = "HashSet-String-cache.object";
 
-
-  private ArrayList<String> sharedDirectories =  new ArrayList<String>();
-  private ArrayList<FileEntry> searchResults = new ArrayList<FileEntry>();
+  private ArrayList<String> sharedDirectories = new ArrayList<String>();
+  private SearchResultModel searchResults = new SearchResultModel();
 
   private String nodeCache;
   private HashSet<String> nodes;
@@ -76,6 +76,16 @@ public class Client implements Runnable {
     return addConnection(other.getListenningIP(), other.getListenningPort());
   }
 
+  public Long addConnection(String node) throws IOException {
+    int port = LISTEN_PORT;
+    String ip = node;
+    if (node.contains(":")) {
+      ip = node.substring(0, node.indexOf(":"));
+      port = Integer.valueOf(node.substring(node.indexOf(":")+1));
+    }
+    return addConnection(ip, port);
+  }
+  
   public Long addConnection(String host, int port) throws IOException {
     Connection c = new Connection(this, host, port);
     if (c.isOpen()) {
@@ -176,13 +186,13 @@ public class Client implements Runnable {
     route.route(r);
   }
 
-  public ArrayList<FileEntry> getSearchResults() {
+  public SearchResultModel getSearchResults() {
     return this.searchResults;
   }
   
   public synchronized void addResults(SearchResults results) {
     for (int i = 0; i < results.getResultsCount(); ++i) {
-      searchResults.add(results.getResults(i));
+      searchResults.addResult(results.getResults(i));
     }
   }
   
@@ -194,21 +204,19 @@ public class Client implements Runnable {
   public void run() {
     for (String node : nodes) {
       if (nodeConnections.containsKey(node)) continue;
-      int port = LISTEN_PORT;
-      String ip = node;
-      if (node.contains(":")) {
-        ip = node.substring(0, node.indexOf(":"));
-        port = Integer.valueOf(node.substring(node.indexOf(":")+1));
+      Long remoteId = null;
+      try {
+        remoteId = addConnection(node);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
       }
- 
-      Connection c = new Connection(this, ip, port);
-      if (c.isOpen()) {
+      if (remoteId != null) {
         if (DEBUG) {
-          System.out.println(toString() + ": connected to " + c.toString());
+          System.out.println(toString() + ": connected to " + node);
         }
-        nodeConnections.put(ip + ":" + port, c);
       } else if (DEBUG) {
-        System.out.println(toString() + ": connection failed to " + c.toString());
+        System.out.println(toString() + ": connection failed to " + node);
       }
     }
     while (!socket.isClosed()) {
