@@ -4,10 +4,12 @@ package fish.finder.gui;
 import javax.swing.JFrame;
 import javax.swing.JButton;
 import java.awt.BorderLayout;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JFileChooser;
@@ -27,129 +29,153 @@ import fish.finder.proto.Message.FileEntry;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.swing.JCheckBox;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.JTabbedPane;
+import java.awt.GridLayout;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
 public class GUI extends JFrame implements Runnable {
 
   private Client client;
   private JLabel statusLabel;
-  private JCheckBox debugCheck;
+  private ImageIcon loader;
+  private JLabel shareStatus;
   private DefaultListModel<String> shareList = new DefaultListModel<String>();
-  private JList<FileEntry> searchResults;
 
   public GUI() {
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setBounds(100, 100, 646, 445);
+    setBounds(100, 100, 448, 426);
     JPanel panel = new JPanel();
     panel.setToolTipText("");
     getContentPane().add(panel, BorderLayout.CENTER);
     panel.setLayout(null);
-
-    final JButton connectionButton = new JButton("Join");
-    connectionButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (client != null) {
-          client.close();
-          client = null;
-          connectionButton.setText("Join");
-        } else {
-          try {
-            int port = Integer.valueOf(clientPort.getText());
-            Client c = new Client(port);
-            connectionButton.setText("Leave");
-            client = c;
-          } catch (ClassNotFoundException e1) {
-            JOptionPane.showMessageDialog(GUI.this, "Uknown error: " + e1.getMessage());
-          } catch (IOException e1) {
-            JOptionPane.showMessageDialog(GUI.this, "Uknown error: "+ e1.getMessage());
-          }
-        }
-      }
-    });
     
     statusLabel = new JLabel("Status: Disconnected");
     statusLabel.setFont(new Font("Tahoma", Font.BOLD, 14));
-    statusLabel.setBounds(10, 11, 414, 14);
+    statusLabel.setBounds(10, 11, 275, 14);
     panel.add(statusLabel);
-    connectionButton.setBounds(10, 36, 89, 23);
-    panel.add(connectionButton);
     
-    JList<String> shareList = new JList<String>();
-    shareList.setBounds(10, 122, 196, 256);
-    panel.add(shareList);
-    shareList.setModel(this.shareList);
+    JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+    tabbedPane.setBounds(10, 36, 414, 331);
+    panel.add(tabbedPane);
     
-    JButton shareButton = new JButton("Share...");
-    shareButton.addActionListener(new ActionListener() {
+    JPanel connection = new JPanel();
+    connection.setToolTipText("");
+    tabbedPane.addTab("Connection", null, connection, null);
+    connection.setLayout(null);
+    
+    JPanel filePanel = new JPanel();
+    tabbedPane.addTab("Share files", null, filePanel, null);
+    filePanel.setLayout(null);
+    
+    JPanel searchPanel = new JPanel();
+    tabbedPane.addTab("Search", null, searchPanel, null);
+    searchPanel.setLayout(null);
+    
+    final JLabel fileNameLabel = new JLabel("");
+    fileNameLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+    fileNameLabel.setBounds(308, 38, 91, 14);
+    searchPanel.add(fileNameLabel);
+    
+    JLabel lblSize = new JLabel("Size:");
+    lblSize.setBounds(252, 63, 46, 14);
+    searchPanel.add(lblSize);
+    
+    final JLabel fileSizeLabel = new JLabel("");
+    fileSizeLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+    fileSizeLabel.setBounds(308, 63, 91, 14);
+    searchPanel.add(fileSizeLabel);
+    
+    JButton btnShareFolder = new JButton("Share folder...");
+    btnShareFolder.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new java.io.File("."));
-        chooser.setDialogTitle("Choose a directory to share");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setAcceptAllFileFilterUsed(false);
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
 
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-          client.shareDirectory(chooser.getSelectedFile().getAbsolutePath());
+        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+          client.shareDirectory(fileChooser.getSelectedFile().getAbsolutePath());
+        } 
+      }
+    });
+    btnShareFolder.setBounds(10, 11, 133, 23);
+    filePanel.add(btnShareFolder);
+    
+    JList<String> shareGUIList = new JList<String>();
+    shareGUIList.setBounds(10, 45, 389, 247);
+    shareGUIList.setModel(shareList);
+    filePanel.add(shareGUIList);
+    
+    shareStatus = new JLabel("");
+    shareStatus.setFont(new Font("Tahoma", Font.BOLD, 11));
+    shareStatus.setBounds(153, 11, 246, 14);
+    filePanel.add(shareStatus);
+
+
+   
+
+    final JList<String> searchResultList = new JList<String>();
+    searchResultList.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent arg0) {
+        if (arg0.getFirstIndex() == arg0.getLastIndex()) {
+          FileEntry e = 
+              client.getSearchResults().getFileEntry(arg0.getFirstIndex());
+          fileNameLabel.setText(e.getName());
+          fileSizeLabel.setText(Index.sizeToUnit(e.getSize()));
         }
       }
     });
-    shareButton.setBounds(10, 88, 89, 23);
-    panel.add(shareButton);
+    searchResultList.setBounds(10, 37, 232, 255);
+    searchPanel.add(searchResultList);
     
-    JSeparator separator = new JSeparator();
-    separator.setBounds(10, 70, 621, 7);
-    panel.add(separator);
-    
-    textField = new JTextField();
-    textField.setBounds(297, 89, 196, 20);
-    panel.add(textField);
-    textField.setColumns(10);
-    
-    JLabel lblSearchFile = new JLabel("Search file:");
-    lblSearchFile.setBounds(225, 92, 62, 14);
-    panel.add(lblSearchFile);
-    
-    JButton searchButton = new JButton("Search");
-    searchButton.addActionListener(new ActionListener() {
+    final JButton joinBtn = new JButton("Join");
+    joinBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (client != null) {
-          String q = textField.getText();
-          client.remoteSearch(q);
-          searchResults.setModel(client.getSearchResults());
+        if (client == null) {
+          int port = Integer.valueOf(listenPort.getText());
+          try {
+            client = new Client(port);
+            searchResultList.setModel(client.getSearchResults());
+            joinBtn.setText("Leave");
+          } catch (ClassNotFoundException | IOException  e1) {
+            JOptionPane.showMessageDialog(GUI.this, 
+                "Unable to join: " + e1.toString());
+          }
+        } else {
+          client.close();
+          client = null;
+          joinBtn.setText("Join");
         }
       }
     });
-    searchButton.setBounds(503, 88, 89, 23);
-    panel.add(searchButton);
+    joinBtn.setBounds(10, 9, 103, 31);
+    connection.add(joinBtn);
     
-    JLabel lblNewLabel_1 = new JLabel("Transfers:");
-    lblNewLabel_1.setBounds(10, 389, 89, 14);
-    panel.add(lblNewLabel_1);
+    JLabel label = new JLabel("Port:");
+    label.setBounds(323, 9, 24, 14);
+    connection.add(label);
     
-    searchResults = new JList<FileEntry>();
-    searchResults.setBounds(235, 122, 357, 256);
-    panel.add(searchResults);
+    listenPort = new JTextField();
+    listenPort.setBounds(357, 9, 42, 20);
+    listenPort.setText("9119");
+    listenPort.setColumns(10);
+    connection.add(listenPort);
     
-    JLabel lblPort = new JLabel("Port:");
-    lblPort.setBounds(109, 40, 30, 14);
-    panel.add(lblPort);
-    
-    clientPort = new JTextField();
-    clientPort.setText("9119");
-    clientPort.setBounds(131, 37, 62, 20);
-    panel.add(clientPort);
-    clientPort.setColumns(10);
-    
-    JLabel lblConnectManually = new JLabel("Connect manually:");
-    lblConnectManually.setBounds(203, 40, 95, 14);
-    panel.add(lblConnectManually);
+    JLabel lblConnectManuallyTo = new JLabel("Connect manually to node:");
+    lblConnectManuallyTo.setBounds(10, 273, 135, 14);
+    connection.add(lblConnectManuallyTo);
     
     nodeName = new JTextField();
-    nodeName.setBounds(297, 37, 86, 20);
-    panel.add(nodeName);
+    nodeName.setText("localhost");
     nodeName.setColumns(10);
+    nodeName.setBounds(165, 270, 135, 20);
+    connection.add(nodeName);
     
     JButton connectBtn = new JButton("Connect");
     connectBtn.addActionListener(new ActionListener() {
@@ -158,38 +184,76 @@ public class GUI extends JFrame implements Runnable {
           try {
             client.addConnection(nodeName.getText());
           } catch (IOException e1) {
-            JOptionPane.showMessageDialog(GUI.this, 
-                "Error connecting to " + nodeName.getText());
+            e1.printStackTrace();
           }
         }
       }
     });
-    connectBtn.setBounds(404, 36, 89, 23);
-    panel.add(connectBtn);
+    connectBtn.setBounds(310, 269, 89, 23);
+    connection.add(connectBtn);
     
-    debugCheck = new JCheckBox("debug");
-    debugCheck.addChangeListener(new ChangeListener() {
-      public void stateChanged(ChangeEvent arg0) {
-        boolean debug = debugCheck.isSelected();
-        Client.DEBUG = debug;
-        Connection.DEBUG = debug;
-        Route.DEBUG = debug;
-        Index.DEBUG = debug;
-      }
-    });
-    debugCheck.setBounds(530, 2, 62, 23);
-    panel.add(debugCheck);
     
-    JButton btnNewButton = new JButton("Network topology");
-    btnNewButton.addActionListener(new ActionListener() {
+    searchQuery = new JTextField();
+    searchQuery.setBounds(10, 6, 232, 20);
+    searchQuery.setColumns(10);
+    searchPanel.add(searchQuery);
+    
+    JButton button_2 = new JButton("Search");
+    button_2.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (client != null) {
-          new TopologyMap(client).setVisible(true);
+          String q = searchQuery.getText();
+          client.remoteSearch(q);
         }
       }
     });
-    btnNewButton.setBounds(405, 2, 119, 23);
-    panel.add(btnNewButton);
+    button_2.setBounds(255, 5, 144, 23);
+    searchPanel.add(button_2);
+    
+    JLabel lblName = new JLabel("Name:");
+    lblName.setBounds(252, 38, 46, 14);
+    searchPanel.add(lblName);
+    
+
+    
+    JButton downloadBtn = new JButton("Download");
+    downloadBtn.setBounds(252, 269, 147, 23);
+    searchPanel.add(downloadBtn);
+    
+    JPanel transferPanel = new JPanel();
+    tabbedPane.addTab("Transfers", null, transferPanel, null);
+    
+    JPanel miscPanel = new JPanel();
+    tabbedPane.addTab("Misc", null, miscPanel, null);
+    
+    final JCheckBox debugCheck = new JCheckBox("debug");
+    debugCheck.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent arg0) {
+        boolean debug = debugCheck.isSelected();
+        Route.DEBUG = debug;
+        Connection.DEBUG = debug;
+        Client.DEBUG = debug;
+        Index.DEBUG = debug;
+      }
+    });
+    miscPanel.add(debugCheck);
+    
+    JButton button_3 = new JButton("Network topology...");
+    button_3.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        new TopologyMap(client).setVisible(true);
+      }
+    });
+    miscPanel.add(button_3);
+    
+    JPanel workingPanel = new JPanel();
+    workingPanel.setBounds(298, 11, 126, 40);
+    panel.add(workingPanel);
+    workingPanel.setLayout(null);
+    
+    JLabel operationLabel = new JLabel("");
+    operationLabel.setBounds(0, 0, 126, 40);
+    workingPanel.add(operationLabel);
 
     addWindowListener(new java.awt.event.WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) {
@@ -198,16 +262,18 @@ public class GUI extends JFrame implements Runnable {
             client = null;
           }
       }
-  });
+    });
+    URL i = GUI.class.getResource("/images/loading.gif");
+    loader = new ImageIcon(i);
   }
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
-  private JTextField textField;
-  private JTextField clientPort;
+  private JTextField listenPort;
   private JTextField nodeName;
+  private JTextField searchQuery;
 
   @Override
   public void run() {
@@ -222,6 +288,9 @@ public class GUI extends JFrame implements Runnable {
         for (String dir : c.getSharedDirectories()) {
           shareList.addElement(dir);
         }
+        shareStatus.setText("Sharing " + client.getSharedFileCount() + 
+                            " files, total " + 
+                            Index.sizeToUnit(client.getShareFileSize()));
       } else {
         this.statusLabel.setText("Status: Disconnected");
       }

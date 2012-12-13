@@ -8,7 +8,7 @@ import javax.swing.event.ListDataListener;
 
 import fish.finder.proto.Message.FileEntry;
 
-public class SearchResultModel implements ListModel<FileEntry> {
+public class SearchResultModel implements ListModel<String> {
 
   private ArrayList<FileEntry> searchResults = new ArrayList<FileEntry>();
   private ArrayList<ListDataListener> listeners = 
@@ -36,9 +36,13 @@ public class SearchResultModel implements ListModel<FileEntry> {
     searchResults.clear();
   }
   
+  public FileEntry getFileEntry(int index) {
+    return searchResults.get(index);
+  }
+  
   @Override
-  public FileEntry getElementAt(int arg0) {
-    return searchResults.get(arg0);
+  public String getElementAt(int arg0) {
+    return searchResults.get(arg0).getName();
   }
 
   @Override

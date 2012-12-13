@@ -1,19 +1,19 @@
 package fish.finder.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.junit.After;
-import org.junit.Test;
 
 import fish.finder.Client;
-import fish.finder.Route;
+import fish.finder.gui.TopologyMap;
 
-public class TestRoute {
+public class testTopologyGUI {
 
+  private TopologyMap map;
   private int count = 1;
   private ArrayList<Client> createdClients = new ArrayList<Client>();
   private Client createClient() throws ClassNotFoundException, IOException {
@@ -25,7 +25,6 @@ public class TestRoute {
     count++;
     return client;
   }
-  @After
   public void tearDown() {
     for(Client c : createdClients) {
       c.close();
@@ -33,9 +32,7 @@ public class TestRoute {
     createdClients.clear();
   }
   
-  @Test
-  public void testRouting() throws ClassNotFoundException, IOException, InterruptedException {
-    Route.DEBUG = false;
+  public testTopologyGUI() throws ClassNotFoundException, IOException, InterruptedException {
     Client client1 = createClient();
     Client client2 = createClient();
     Client client3 = createClient();
@@ -53,28 +50,21 @@ public class TestRoute {
     assertTrue(client3.getRoute().hasRoute(client2));
 
     client1.broadcastPing();
-    Thread.sleep(1000);
-    System.out.println("Routes from " + client2.getLocalIdentity());
-    client2.getRoute().printRoutes();
-
-    assertTrue(client1.getRoute().hasRoute(client3));
-    assertTrue(client3.getRoute().hasRoute(client1));
-    
-    assertEquals(client1.getRoute().
-                 getViaPeers(client2.getLocalIdentity()).size(), 1);
-
-    assertEquals(client2.getRoute().directConnections(), 2);
-    assertEquals(client2.getRoute().reachableNodes(), 2);
-
-    assertEquals(client1.getRoute().directConnections(), 1);
-    assertEquals(client1.getRoute().reachableNodes(), 2);
-
-    assertEquals(client3.getRoute().directConnections(), 1);
-    assertEquals(client3.getRoute().reachableNodes(), 2);
-
-    assertEquals(client1.getRoute().getRoutedMessage(), 0);
-    assertEquals(client2.getRoute().getRoutedMessage(), 1);
-    assertEquals(client3.getRoute().getRoutedMessage(), 0);
+    map = new TopologyMap(client1);
+    map.setVisible(true);
+  }
+  /**
+   * @param args
+   * @throws InterruptedException 
+   * @throws IOException 
+   * @throws ClassNotFoundException 
+   */
+  public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
+    testTopologyGUI g = new testTopologyGUI();
+    while(g.map.isVisible()) {
+      Thread.sleep(1000);
+    }
+    g.tearDown();
   }
 
 }

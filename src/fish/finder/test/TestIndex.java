@@ -14,7 +14,7 @@ public class TestIndex {
   @Test
   public void testAddToIndex() {
     Index index = new Index();
-    index.addDirectory(".");
+    index.addDirectorySyncrhonous(".");
 
     ArrayList<FileEntry> results = index.search("client");
     assertTrue(results.size() > 0);

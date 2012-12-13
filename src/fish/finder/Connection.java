@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.FileEntry;
 import fish.finder.proto.Message.MessageType;
 import fish.finder.proto.Message.Request;
@@ -24,6 +25,9 @@ public class Connection implements Runnable {
   private boolean open = false;
   private boolean host = false;
   private long remoteIdentity;
+  
+  private long lastMessage = 0;
+  private int messageCount = 0;
 
   public long getRemoteIdentity() {
     return remoteIdentity;
@@ -70,6 +74,10 @@ public class Connection implements Runnable {
     }
   }
 
+  public String getConnectString() {
+    return getRemoteIP() + ":" + this.getRemotePort();
+  }
+  
   private void success() {
     open = true;
     client.getRoute().addConnection(this);
@@ -81,6 +89,12 @@ public class Connection implements Runnable {
     socket.close();
   }
 
+  public ConnectionData getConnectionData() {
+    return ConnectionData.newBuilder()
+        .setHost(this.getRemoteIP())
+        .setPort(getRemotePort()).build();
+  }
+  
   public boolean isHost() {
     return host;
   }
@@ -135,63 +149,76 @@ public class Connection implements Runnable {
     return open;
   }
 
-  @Override
-  public void run() {
-    while (!socket.isClosed() && open) {
-      Request message = readMessage();
-      if (message == null) break;
-      Request response = null;
+  private boolean handleMessage() {
+    Request message = readMessage();
+    if (message == null) return false;
+    Request response = null;
 
-      client.getRoute().learn(this, message);
+    client.getRoute().learn(this, message);
 
-      long destination = message.getDestination();
-      if (destination != Connection.BROADCAST && 
-          message.getDestination() != client.getLocalIdentity()) {
-        client.getRoute().route(message);
-      } else {
-        switch (message.getType().getNumber()) {
-          case MessageType.PING_VALUE:
-            response = client.createRequest(MessageType.PONG)
-                .setDestination(message.getSource()) 
+    long destination = message.getDestination();
+    if (destination != Connection.BROADCAST && 
+        message.getDestination() != client.getLocalIdentity()) {
+      client.getRoute().route(message, this);
+    } else {
+      switch (message.getType().getNumber()) {
+        case MessageType.PING_VALUE:
+          response = client.createRequest(MessageType.PONG)
+              .setDestination(message.getSource()) 
+              .build();
+          send(response);
+          break;
+
+        case MessageType.PONG_VALUE:
+          break;
+
+        case MessageType.SEARCH_VALUE:
+          String q = new String(message.getData().toByteArray());
+          ArrayList<FileEntry> results = client.search(q);
+          SearchResults.Builder resultsBuilder = SearchResults.newBuilder();
+          for (int i = 0; i < results.size(); ++i) {
+            FileEntry result = FileEntry.newBuilder(results.get(i))
+                .setHost(getLocalIdentity())
                 .build();
-            send(response);
-            break;
-  
-          case MessageType.PONG_VALUE:
-            break;
-  
-          case MessageType.SEARCH_VALUE:
-            String q = new String(message.getData().toByteArray());
-            ArrayList<FileEntry> results = client.search(q);
-            SearchResults.Builder resultsBuilder = SearchResults.newBuilder();
-            for (int i = 0; i < results.size(); ++i) {
-              resultsBuilder.addResults(results.get(i));
-            }
-            response = client.createRequest(MessageType.RESULTS)
-                .setData(resultsBuilder.build().toByteString())
-                .setDestination(message.getSource())
-                .build();
-            send(response);
-            break;
-          case MessageType.RESULTS_VALUE:
-            try {
-              SearchResults remoteResults = null;
-              remoteResults = SearchResults.parseFrom(message.getData());
-              client.addResults(remoteResults);
-            } catch (InvalidProtocolBufferException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-            break;
-          default: 
-            System.out.println(toString() + ": unhandled message: \n" + 
-                               message.toString());
-        }
-        if (message.getDestination() == Connection.BROADCAST) {
-          client.getRoute().route(message);
-        }
+            resultsBuilder.addResults(result);
+          }
+          response = client.createRequest(MessageType.RESULTS)
+              .setData(resultsBuilder.build().toByteString())
+              .setDestination(message.getSource())
+              .build();
+          send(response);
+          break;
+        case MessageType.RESULTS_VALUE:
+          try {
+            SearchResults remoteResults = null;
+            remoteResults = SearchResults.parseFrom(message.getData());
+            client.addResults(remoteResults);
+          } catch (InvalidProtocolBufferException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          break;
+        default: 
+          System.out.println(toString() + ": unhandled message: \n" + 
+                             message.toString());
+      }
+      if (message.getDestination() == Connection.BROADCAST) {
+        client.getRoute().route(message, this);
       }
     }
+    return true;
+  }
+  
+  @Override
+  public void run() {
+    while (!socket.isClosed() && open && handleMessage()) {
+      messageCount++;
+      lastMessage = System.currentTimeMillis();
+    }
+    if (DEBUG) {
+      System.out.println(toString() + ": Connection lost");
+    }
+    client.getRoute().connectionLost(this);
   }
 
   public String toString() {

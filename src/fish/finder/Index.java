@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.SortedMap;
@@ -14,14 +15,17 @@ import com.google.protobuf.ByteString;
 
 import fish.finder.proto.Message.FileEntry;
 
-public class Index {
+public class Index implements Runnable {
 
   public static boolean DEBUG = false;
 
+  private long totalFileSize = 0;
   private HashMap<String, FileEntry> fileNameToEntry = 
       new HashMap<String, FileEntry>();
   private TreeMap<String, ArrayList<String>> searchIndex = 
       new TreeMap<String, ArrayList<String>>();
+
+  private ArrayList<String> indexQueue = new ArrayList<String>();
 
   public ArrayList<FileEntry> search(String q) {
     ArrayList<FileEntry> results = new ArrayList<FileEntry>();
@@ -71,8 +75,44 @@ public class Index {
     }
     return null;
   }
+
+  public int getFileCount() {
+    return fileNameToEntry.size();
+  }
   
-  public void addDirectory(String dir) {
+  public static final double KiB = 1024;
+  public static final double MiB = KiB*1024;
+  public static final double GiB = MiB*1024;
+  public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
+
+  public static String sizeToUnit(long size) {
+    if (size / GiB >= 2) {
+      return DECIMAL_FORMAT.format(size / GiB) + " GiB";
+    } else if (size / MiB >= 2) {
+      return DECIMAL_FORMAT.format(size / MiB) + " MiB";
+    } else if (size / KiB >= 2) {
+      return DECIMAL_FORMAT.format(size / KiB) + " KiB";
+    }
+    return size + " B";
+  }
+
+  public void addDirectorySyncrhonous(String dir) {
+    addDirectory(dir);
+  }
+  public void addDirectoryAsynchronous(String dir) {
+    synchronized (indexQueue) {
+      indexQueue.add(dir);
+      if (indexQueue.size() == 1) {
+        new Thread(this).start();
+      }
+    }
+  }
+
+  public long getTotalFileSize() {
+    return totalFileSize;
+  }
+
+  private void addDirectory(String dir) {
     try {
       File f = new File(dir);
       File[] list = f.listFiles();
@@ -87,12 +127,30 @@ public class Index {
               .setHash(hash)
               .build();
           fileNameToEntry.put(in.getAbsolutePath(), entry);
+          totalFileSize += in.length();
           addToIndex(in);
         }
       }
     } catch (Exception e) {
       System.err.println("Could not add: " + dir);
       e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void run() {
+    while (true) {
+      String dir = null;
+      synchronized (indexQueue) {
+        if (indexQueue.size() > 0) {
+          dir = indexQueue.remove(0);
+        }
+      }
+      if (dir != null) {
+        addDirectory(dir);
+      } else {
+        break;
+      }
     }
   }
 }

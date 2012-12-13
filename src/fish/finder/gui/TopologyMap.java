@@ -91,22 +91,21 @@ public class TopologyMap extends JFrame implements Runnable {
   
   private void drawArrow(Graphics2D g, int fx, int fy, int tx, int ty) {
     g.setColor(Color.WHITE);
-    g.drawLine(fx, fy, tx, ty);
+    g.drawLine(fx + basicScale, fy + basicScale / 2, tx + basicScale, ty + basicScale/2);
   }
 
   private void drawPeersRecursive(Graphics2D g, Long peer, int x, int y) {
     Collection<Long> peers = client.getRoute().getViaPeers(peer);
     if (peers.size() == 0) return;
-    System.out.println("Via peers size: "+peers.size());
     double peerAngle = Math.PI*2/peers.size();
     int peerCount = 0;
     for (Long id : peers) {
-      double angle = peerAngle*peerCount;
+      double angle = Math.PI/2 + peerAngle*peerCount;
       int py = y + (int)(basicScale*2*Math.sin(angle));
       int px = x + (int)(basicScale*4*Math.cos(angle));
       drawArrow(g, x, y, px, py);
       drawNode(g, px, py, 2*basicScale, basicScale,
-          new Color(0, 0, 125), ""+id, null);
+          new Color(125, 0, 0), ""+id, null);
       ++peerCount;
       drawPeersRecursive(g, id, px, py);
     }

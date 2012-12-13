@@ -32,7 +32,7 @@ public class TestClient {
     client2 = new Client(9129, "file-cache2.object");
     client1 = new Client(9219, "file-cache.object");
     Thread.sleep(1000);
-    assertTrue(client2.getConnectionCount() > 0);
+    assertTrue(client2.getRoute().directConnections() > 0);
     client1.close();
     client2.close();
 
@@ -55,6 +55,7 @@ public class TestClient {
     assertTrue(indentity == client2.getLocalIdentity());
     client2.shareDirectory(".");
 
+    Thread.sleep(1000);
     assertTrue(client1.search(searchFor).size() == 0);
     assertTrue(client2.search(searchFor).size() > 0);
 
@@ -65,6 +66,8 @@ public class TestClient {
 
     client1.close();
     client2.close();
+    new File("file-cache.object").delete();
+    new File("file-cache2.object").delete();
   }
 
 }

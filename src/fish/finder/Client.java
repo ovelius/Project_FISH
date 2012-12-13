@@ -17,6 +17,7 @@ import java.util.Random;
 import com.google.protobuf.ByteString;
 
 import fish.finder.gui.SearchResultModel;
+import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.FileEntry;
 import fish.finder.proto.Message.MessageType;
 import fish.finder.proto.Message.Request;
@@ -31,8 +32,7 @@ public class Client implements Runnable {
   private SearchResultModel searchResults = new SearchResultModel();
 
   private String nodeCache;
-  private HashSet<String> nodes;
-  private HashMap<String, Connection> nodeConnections;
+  private HashSet<ConnectionData> nodes;
 
   private Index index;
   private ServerSocket socket;
@@ -49,10 +49,9 @@ public class Client implements Runnable {
   public Client(int port, String cacheFile) throws IOException, ClassNotFoundException {
     nodeCache = cacheFile;
     socket = new ServerSocket(port);
-    nodes = new HashSet<String>();
+    nodes = new HashSet<ConnectionData>();
     index = new Index();
     route = new Route();
-    nodeConnections = new HashMap<String, Connection>();
 
     localIdentity = Connection.BROADCAST;
     while (localIdentity == Connection.BROADCAST) {
@@ -63,17 +62,24 @@ public class Client implements Runnable {
     if (fileCache.exists()) {
       ObjectInputStream ois = 
           new ObjectInputStream(new FileInputStream(nodeCache));
-      nodes  = (HashSet<String>)ois.readObject(); 
+      nodes  = (HashSet<ConnectionData>)ois.readObject(); 
       if (DEBUG) {
         System.out.println(toString() + ": read " + nodes.size() + " nodes from cache.");
       }
       ois.close();
     }
+    /*if (nodes.isEmpty()) {
+      nodes.add("o.is-a-geek.com");
+    }*/
     new Thread(this).start();
   }
   
   public Long connectoTo(Client other) throws IOException {
     return addConnection(other.getListenningIP(), other.getListenningPort());
+  }
+
+  public Long addConnection(ConnectionData d) throws IOException {
+    return addConnection(d.getHost(), d.getPort());
   }
 
   public Long addConnection(String node) throws IOException {
@@ -90,7 +96,6 @@ public class Client implements Runnable {
     Connection c = new Connection(this, host, port);
     if (c.isOpen()) {
       if (c.getRemoteIdentity() != this.localIdentity) {
-        nodeConnections.put(c.getRemoteIP() + ":" + c.getRemotePort(), c);
         return c.getRemoteIdentity();
       } else {
         c.close();
@@ -101,21 +106,22 @@ public class Client implements Runnable {
     }
     return null;
   }
-  
+
   public void close() {
     try {
       socket.close();
     } catch (IOException e) { }
     nodes.clear();
-    for (String node : nodeConnections.keySet()) {
-      Connection c = nodeConnections.get(node);
-      if (c.isOpen()) {
+    ArrayList<Connection> connections = new ArrayList<Connection>();
+    connections.addAll(route.getDirectConnections());
+    for (Connection c : connections) {
+      if (c != null && c.isOpen()) {
         try {
             c.close();
         } catch (IOException e) { }
       }
       if (!c.isHost()) {
-        nodes.add(node);
+        nodes.add(c.getConnectionData());
       }
     }
     File fileCache = new File(nodeCache);
@@ -136,18 +142,14 @@ public class Client implements Runnable {
     File f = new File(dir);
     if (f.exists()) {
       sharedDirectories.add(f.getAbsolutePath());
-      index.addDirectory(dir);
+      index.addDirectoryAsynchronous(dir);
     }
   }
 
-  public int getConnectionCount() {
-    return nodeConnections.size();
-  }
-  
   public ArrayList<String> getSharedDirectories() {
     return this.sharedDirectories;
   }
-  
+
   public long getLocalIdentity() {
     return localIdentity;
   }
@@ -156,6 +158,14 @@ public class Client implements Runnable {
     return route;
   }
   
+  public int getSharedFileCount() {
+    return index.getFileCount();
+  }
+  
+  public long getShareFileSize() {
+    return index.getTotalFileSize();
+  }
+
   public int getListenningPort() {
     return socket.getLocalPort();
   }
@@ -176,14 +186,14 @@ public class Client implements Runnable {
     Request r = createRequest(MessageType.SEARCH)
           .setData(ByteString.copyFrom(q.getBytes()))
           .setDestination(Connection.BROADCAST).build();
-    route.route(r);
+    route.route(r, null);
   }
 
   public void broadcastPing() {
     searchResults.clear();
     Request r = createRequest(MessageType.PING)
           .setDestination(Connection.BROADCAST).build();
-    route.route(r);
+    route.route(r, null);
   }
 
   public SearchResultModel getSearchResults() {
@@ -202,8 +212,7 @@ public class Client implements Runnable {
 
   @Override
   public void run() {
-    for (String node : nodes) {
-      if (nodeConnections.containsKey(node)) continue;
+    for (ConnectionData node : nodes) {
       Long remoteId = null;
       try {
         remoteId = addConnection(node);
@@ -231,9 +240,6 @@ public class Client implements Runnable {
         System.out.println(toString() + ": accepted connection from " + adress);
       }
       Connection c = new Connection(this, newConnection);
-      if (c.isOpen()) {
-        nodeConnections.put(adress, c);
-      }
     }
   }
 

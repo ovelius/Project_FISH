@@ -7,7 +7,8 @@ enum MessageType {
   PONG = 1;
   SEARCH = 2;
   RESULTS = 3;
-  TRANSFER = 4;
+  OPEN_FILE_CHANNEL = 4;
+  AKNOWLEDGE_FILE_CHANNEL = 5;
 }
 
 message Request {
@@ -20,6 +21,11 @@ message Request {
   optional bytes data = 5;
 }
 
+message ConnectionData {
+  required string host = 1;
+  required int32 port = 2;
+}
+
 message SearchResults {
   repeated FileEntry results = 1;
 }
@@ -28,4 +34,6 @@ message FileEntry {
   required string name = 1;
   required bytes hash = 2;
   required int64 size = 3;
+
+  optional fixed64 host = 4;
 }
