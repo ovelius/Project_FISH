@@ -39,6 +39,20 @@ import javax.swing.JTabbedPane;
 import java.awt.GridLayout;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JProgressBar;
+import java.awt.SystemColor;
+import java.awt.FlowLayout;
+import java.awt.CardLayout;
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.factories.FormFactory;
+import javax.swing.JTextPane;
 
 public class GUI extends JFrame implements Runnable {
 
@@ -95,12 +109,9 @@ public class GUI extends JFrame implements Runnable {
     JButton btnShareFolder = new JButton("Share folder...");
     btnShareFolder.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fileChooser.setAcceptAllFileFilterUsed(false);
-
-        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-          client.shareDirectory(fileChooser.getSelectedFile().getAbsolutePath());
+        String dir = selectDir("Select a directory to share");
+        if (dir != null) {
+          client.shareDirectory(dir);
         } 
       }
     });
@@ -117,10 +128,17 @@ public class GUI extends JFrame implements Runnable {
     shareStatus.setBounds(153, 11, 246, 14);
     filePanel.add(shareStatus);
 
-
-   
-
     final JList<String> searchResultList = new JList<String>();
+    searchResultList.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent arg0) {
+        int index = searchResultList.getSelectedIndex();
+        FileEntry e = 
+              client.getSearchResults().getFileEntry(index);
+        fileNameLabel.setText(e.getName());
+        fileSizeLabel.setText(Index.sizeToUnit(e.getSize()));
+      }
+    });
     searchResultList.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent arg0) {
         if (arg0.getFirstIndex() == arg0.getLastIndex()) {
@@ -217,11 +235,42 @@ public class GUI extends JFrame implements Runnable {
 
     
     JButton downloadBtn = new JButton("Download");
+    downloadBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (client != null) {
+          FileEntry remoteFile = 
+              client.getSearchResults()
+                  .getFileEntry(searchResultList.getSelectedIndex());
+          String dir = selectDir("Select where you want to save the file");
+          if (dir != null) {
+            client.downloadFile(remoteFile, dir);
+          } 
+        }
+      }
+    });
     downloadBtn.setBounds(252, 269, 147, 23);
     searchPanel.add(downloadBtn);
     
     JPanel transferPanel = new JPanel();
     tabbedPane.addTab("Transfers", null, transferPanel, null);
+    transferPanel.setLayout(null);
+    
+    JPanel panel_1 = new JPanel();
+    panel_1.setBounds(10, 11, 389, 79);
+    transferPanel.add(panel_1);
+    panel_1.setLayout(null);
+    
+    JProgressBar progressBar = new JProgressBar();
+    progressBar.setBounds(10, 54, 369, 14);
+    panel_1.add(progressBar);
+    
+    JLabel lblName_1 = new JLabel("Name:");
+    lblName_1.setBounds(10, 11, 46, 14);
+    panel_1.add(lblName_1);
+    
+    JLabel lblNewLabel = new JLabel("New label");
+    lblNewLabel.setBounds(10, 36, 46, 14);
+    panel_1.add(lblNewLabel);
     
     JPanel miscPanel = new JPanel();
     tabbedPane.addTab("Misc", null, miscPanel, null);
@@ -301,6 +350,18 @@ public class GUI extends JFrame implements Runnable {
     }
   }
 
+  public static String selectDir(String title) {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle(title);
+    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    fileChooser.setAcceptAllFileFilterUsed(false);
+
+    if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+      return fileChooser.getSelectedFile().getAbsolutePath();
+    }
+    return null;
+  }
+  
   public static void main(String[] arg) {
     GUI gui = new GUI();
     gui.setVisible(true);

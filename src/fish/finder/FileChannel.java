@@ -67,22 +67,32 @@ public class FileChannel implements Runnable {
   private Socket connectTo(ConnectionData connection) {
     try {
       Socket s = new Socket(connection.getHost(), connection.getPort());
+      s.setKeepAlive(true);
       return s;
     } catch (IOException e) {
       return null;
     }
   }
-  
+
   private Socket listenForConnection() {
     try {
       new Thread(this).start();
-      return listenSocket.accept();
+      Socket s = listenSocket.accept();
+      s.setKeepAlive(true);
+      return s;
     } catch (IOException e) {
       clientSocket = null;
       return null;
     }
   }
-  
+
+  public boolean isOpen() {
+    if (clientSocket != null && !clientSocket.isClosed()) {
+      return true;
+    }
+    return false;
+  }
+
   private boolean doTransfer(File file) {
     try {
       FileInputStream in = new FileInputStream(file);
@@ -159,6 +169,7 @@ public class FileChannel implements Runnable {
     if (clientSocket == null) {
       try {
         listenSocket.close();
+        listenSocket = null;
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();

@@ -21,6 +21,7 @@ import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.FileEntry;
 import fish.finder.proto.Message.MessageType;
 import fish.finder.proto.Message.Request;
+import fish.finder.proto.Message.RequestFilePart;
 import fish.finder.proto.Message.SearchResults;
 
 public class Client implements Runnable {
@@ -37,6 +38,8 @@ public class Client implements Runnable {
   private Index index;
   private ServerSocket socket;
   private Route route;
+  private HashMap<Long, FileMessageChannel> fileChannels = 
+      new HashMap<Long, FileMessageChannel>();
   
   private long localIdentity;
 
@@ -72,6 +75,25 @@ public class Client implements Runnable {
       nodes.add("o.is-a-geek.com");
     }*/
     new Thread(this).start();
+  }
+
+  public void downloadFile(FileEntry f, String dir) {
+    synchronized (fileChannels) {
+      long from = f.getHost();
+      FileMessageChannel channel = new FileMessageChannel(this, f, dir);
+      fileChannels.put(from, channel);
+      channel.startTransfer();
+    }
+  }
+  
+  public RequestFilePart getFileChunk(RequestFilePart request) {
+    return index.requestFileChunk(request);
+  }
+  
+  public void processFileChunk(Request message) {
+    long from = message.getSource();
+    FileMessageChannel channel = fileChannels.get(from);
+    channel.receiveChunk(message);
   }
   
   public Long connectoTo(Client other) throws IOException {

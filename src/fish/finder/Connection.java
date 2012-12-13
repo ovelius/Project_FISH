@@ -11,6 +11,7 @@ import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.FileEntry;
 import fish.finder.proto.Message.MessageType;
 import fish.finder.proto.Message.Request;
+import fish.finder.proto.Message.RequestFilePart;
 import fish.finder.proto.Message.SearchResults;
 
 public class Connection implements Runnable {
@@ -198,6 +199,25 @@ public class Connection implements Runnable {
             e.printStackTrace();
           }
           break;
+        case MessageType.REQUEST_FILE_PART_VALUE:
+          try {
+            RequestFilePart responseData = 
+                client.getFileChunk(
+                    RequestFilePart.parseFrom(message.getData()));
+            response = client.createRequest(MessageType.RESPONSE_FILE_PART)
+                .setDestination(message.getSource())
+                .setData(responseData.getData())
+                .build();
+            send(response);
+          } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+          }
+          break;
+
+        case MessageType.RESPONSE_FILE_PART_VALUE:
+          client.processFileChunk(message);
+          break;
+
         default: 
           System.out.println(toString() + ": unhandled message: \n" + 
                              message.toString());

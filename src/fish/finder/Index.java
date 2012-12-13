@@ -2,6 +2,8 @@ package fish.finder;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -14,6 +16,7 @@ import java.util.TreeMap;
 import com.google.protobuf.ByteString;
 
 import fish.finder.proto.Message.FileEntry;
+import fish.finder.proto.Message.RequestFilePart;
 
 public class Index implements Runnable {
 
@@ -22,6 +25,8 @@ public class Index implements Runnable {
   private long totalFileSize = 0;
   private HashMap<String, FileEntry> fileNameToEntry = 
       new HashMap<String, FileEntry>();
+  private HashMap<String, String> fileHashNameToPath =
+      new HashMap<String, String>();
   private TreeMap<String, ArrayList<String>> searchIndex = 
       new TreeMap<String, ArrayList<String>>();
 
@@ -112,6 +117,41 @@ public class Index implements Runnable {
     return totalFileSize;
   }
 
+  public RequestFilePart requestFileChunk(RequestFilePart request) {
+    try {
+      return requestFileChunkInternal(request);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  private RequestFilePart requestFileChunkInternal(RequestFilePart request) throws IOException {
+    FileEntry localFile = request.getFile();
+    int length = (int)(request.getToByte() - request.getFromByte());
+   // System.out.println("Length is"+length);
+    String hkey = localFile.getName() + localFile.getHash();
+    String absPath = fileHashNameToPath.get(hkey);
+    if (absPath != null) {
+      FileInputStream in = new FileInputStream(new File(absPath));
+    //  System.out.println("Opened input stream for "+localFile);
+   //   System.out.println("abs path is: "+absPath +", will read "+length+ "from req:\n"+request);
+      byte[] buf = new byte[length];
+      if (in.skip(request.getFromByte()) == request.getFromByte()) {
+        int read = in.read(buf, 0, length);
+        if (read > 0) {
+          RequestFilePart response = RequestFilePart.newBuilder(request)
+              .setToByte(request.getFromByte() + read)
+              .setData(ByteString.copyFrom(buf))
+              .build();
+          in.close();
+          return response;
+        }
+      }
+      in.close();
+    }
+    return null;
+  }
+  
   private void addDirectory(String dir) {
     try {
       File f = new File(dir);
@@ -127,6 +167,8 @@ public class Index implements Runnable {
               .setHash(hash)
               .build();
           fileNameToEntry.put(in.getAbsolutePath(), entry);
+          String hkey = entry.getName()+hash;
+          fileHashNameToPath.put(hkey, in.getAbsolutePath());
           totalFileSize += in.length();
           addToIndex(in);
         }

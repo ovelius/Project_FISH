@@ -125,6 +125,9 @@ public class Route {
       connection.send(r);
     }
   }
+  public void route(Request message) {
+    route(message, null);
+  }
   public void route(Request message, Connection sourceConnection) {
     if (message.getTtl() <= 1) {
       System.err.println(toString() + ": TTL expired: \n" + message.toString());

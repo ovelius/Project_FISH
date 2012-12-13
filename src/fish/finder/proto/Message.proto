@@ -7,8 +7,8 @@ enum MessageType {
   PONG = 1;
   SEARCH = 2;
   RESULTS = 3;
-  OPEN_FILE_CHANNEL = 4;
-  AKNOWLEDGE_FILE_CHANNEL = 5;
+  REQUEST_FILE_PART = 4;
+  RESPONSE_FILE_PART = 5;
 }
 
 message Request {
@@ -19,6 +19,14 @@ message Request {
   optional fixed64 destination = 4;
 
   optional bytes data = 5;
+}
+
+message RequestFilePart {
+  required FileEntry file = 1;
+  required int64 fromByte = 2;
+  required int64 toByte = 3;
+
+  optional bytes data = 4;
 }
 
 message ConnectionData {
