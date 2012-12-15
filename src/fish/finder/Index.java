@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
@@ -128,24 +129,28 @@ public class Index implements Runnable {
   private RequestFilePart requestFileChunkInternal(RequestFilePart request) throws IOException {
     FileEntry localFile = request.getFile();
     int length = (int)(request.getToByte() - request.getFromByte());
-   // System.out.println("Length is"+length);
     String hkey = localFile.getName() + localFile.getHash();
     String absPath = fileHashNameToPath.get(hkey);
     if (absPath != null) {
-      FileInputStream in = new FileInputStream(new File(absPath));
-    //  System.out.println("Opened input stream for "+localFile);
-   //   System.out.println("abs path is: "+absPath +", will read "+length+ "from req:\n"+request);
+      RandomAccessFile in = new RandomAccessFile(absPath, "r");
+      in.seek(request.getFromByte());
       byte[] buf = new byte[length];
-      if (in.skip(request.getFromByte()) == request.getFromByte()) {
-        int read = in.read(buf, 0, length);
-        if (read > 0) {
-          RequestFilePart response = RequestFilePart.newBuilder(request)
-              .setToByte(request.getFromByte() + read)
-              .setData(ByteString.copyFrom(buf))
-              .build();
-          in.close();
-          return response;
+      int read = 0;
+      int currentSize = 0;
+      do {
+        currentSize = in.read(buf, read, length - read);
+        if (currentSize > 0) {
+          read += currentSize;
         }
+      } while (currentSize > 0 && read < length);
+
+      if (read > 0) {
+        RequestFilePart response = RequestFilePart.newBuilder(request)
+            .setToByte(request.getFromByte() + read)
+            .setData(ByteString.copyFrom(buf, 0, read))
+            .build();
+        in.close();
+        return response;
       }
       in.close();
     }

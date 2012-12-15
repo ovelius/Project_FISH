@@ -13,6 +13,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -23,6 +24,7 @@ import javax.swing.JTextField;
 
 import fish.finder.Client;
 import fish.finder.Connection;
+import fish.finder.FileMessageChannel;
 import fish.finder.Index;
 import fish.finder.Route;
 import fish.finder.proto.Message.FileEntry;
@@ -31,6 +33,8 @@ import java.awt.Font;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
 
 import javax.swing.JCheckBox;
 import javax.swing.event.ChangeListener;
@@ -60,6 +64,9 @@ public class GUI extends JFrame implements Runnable {
   private JLabel statusLabel;
   private ImageIcon loader;
   private JLabel shareStatus;
+  private JPanel transferPanel;
+  private JScrollPane transferPanelHost;
+  private JTabbedPane tabbedPane;
   private DefaultListModel<String> shareList = new DefaultListModel<String>();
 
   public GUI() {
@@ -75,7 +82,7 @@ public class GUI extends JFrame implements Runnable {
     statusLabel.setBounds(10, 11, 275, 14);
     panel.add(statusLabel);
     
-    JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+    tabbedPane = new JTabbedPane(JTabbedPane.TOP);
     tabbedPane.setBounds(10, 36, 414, 331);
     panel.add(tabbedPane);
     
@@ -231,9 +238,7 @@ public class GUI extends JFrame implements Runnable {
     JLabel lblName = new JLabel("Name:");
     lblName.setBounds(252, 38, 46, 14);
     searchPanel.add(lblName);
-    
 
-    
     JButton downloadBtn = new JButton("Download");
     downloadBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -244,6 +249,7 @@ public class GUI extends JFrame implements Runnable {
           String dir = selectDir("Select where you want to save the file");
           if (dir != null) {
             client.downloadFile(remoteFile, dir);
+            tabbedPane.setSelectedComponent(transferPanelHost);
           } 
         }
       }
@@ -251,26 +257,10 @@ public class GUI extends JFrame implements Runnable {
     downloadBtn.setBounds(252, 269, 147, 23);
     searchPanel.add(downloadBtn);
     
-    JPanel transferPanel = new JPanel();
-    tabbedPane.addTab("Transfers", null, transferPanel, null);
+    transferPanel = new JPanel();
+    transferPanelHost = new JScrollPane(transferPanel);  
+    tabbedPane.addTab("Transfers", null, transferPanelHost, null);
     transferPanel.setLayout(null);
-    
-    JPanel panel_1 = new JPanel();
-    panel_1.setBounds(10, 11, 389, 79);
-    transferPanel.add(panel_1);
-    panel_1.setLayout(null);
-    
-    JProgressBar progressBar = new JProgressBar();
-    progressBar.setBounds(10, 54, 369, 14);
-    panel_1.add(progressBar);
-    
-    JLabel lblName_1 = new JLabel("Name:");
-    lblName_1.setBounds(10, 11, 46, 14);
-    panel_1.add(lblName_1);
-    
-    JLabel lblNewLabel = new JLabel("New label");
-    lblNewLabel.setBounds(10, 36, 46, 14);
-    panel_1.add(lblNewLabel);
     
     JPanel miscPanel = new JPanel();
     tabbedPane.addTab("Misc", null, miscPanel, null);
@@ -312,10 +302,57 @@ public class GUI extends JFrame implements Runnable {
           }
       }
     });
-    URL i = GUI.class.getResource("/images/loading.gif");
-    loader = new ImageIcon(i);
+    //URL i = GUI.class.getResource("/images/loading.gif");
+    //loader = new ImageIcon(i);
   }
 
+  private JPanel createNewTransferPanel() {
+    JPanel sampleTransfer = new JPanel();
+    sampleTransfer.setBounds(10, 11, 389, 79);
+    transferPanel.add(sampleTransfer);
+    sampleTransfer.setLayout(null);
+    
+    JProgressBar progressBar = new JProgressBar();
+    progressBar.setBounds(10, 54, 369, 14);
+    sampleTransfer.add(progressBar);
+    
+    JLabel fileTransferNameLabel = new JLabel("Name:");
+    fileTransferNameLabel.setBounds(10, 11, 200, 14);
+    sampleTransfer.add(fileTransferNameLabel);
+    
+    JLabel transferSpeedLabel = new JLabel("Statistics");
+    transferSpeedLabel.setBounds(208, 11, 200, 14);
+    sampleTransfer.add(transferSpeedLabel);
+    
+    JLabel transferDestionation = new JLabel("Destination:");
+    transferDestionation.setBounds(10, 36, 300, 14);
+    sampleTransfer.add(transferDestionation);
+    return sampleTransfer;
+  }
+  
+  private HashMap<Long, JPanel> transfers = new HashMap<Long, JPanel>();
+  private void modelFileChannels(HashMap<Long, FileMessageChannel> channels) {
+    for (Long sender : channels.keySet()) {
+      FileMessageChannel ch = channels.get(sender);
+      JPanel transfer = transfers.get(sender);
+      if (transfer == null) {
+        transfer = createNewTransferPanel();
+        transfers.put(sender, transfer);
+      }
+      JLabel dst = (JLabel) transfer.getComponent(3);
+      dst.setText("Destination folder:" + ch.getDirectory());
+      
+      JLabel stats = (JLabel) transfer.getComponent(2);
+      stats.setText("Precent complete:" + Index.DECIMAL_FORMAT.format(ch.getPercentComplete()));
+      
+      JLabel name = (JLabel) transfer.getComponent(1);
+      name.setText("Name: " + ch.getRemoteFile().getName());
+      
+      JProgressBar progress = (JProgressBar) transfer.getComponent(0);
+      progress.setValue((int)(ch.getPercentComplete()*100));
+    }
+  }
+  
   /**
    * 
    */
@@ -340,6 +377,7 @@ public class GUI extends JFrame implements Runnable {
         shareStatus.setText("Sharing " + client.getSharedFileCount() + 
                             " files, total " + 
                             Index.sizeToUnit(client.getShareFileSize()));
+        modelFileChannels(client.getFileChannels());
       } else {
         this.statusLabel.setText("Status: Disconnected");
       }

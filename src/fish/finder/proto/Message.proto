@@ -16,9 +16,10 @@ message Request {
   required MessageType type = 2;
 
   required fixed64 source = 3;
-  optional fixed64 destination = 4;
+  optional ConnectionData sourceConnection = 4;
+  optional fixed64 destination = 5;
 
-  optional bytes data = 5;
+  optional bytes data = 6;
 }
 
 message RequestFilePart {

@@ -104,11 +104,16 @@ public final class Message {
     boolean hasSource();
     long getSource();
     
-    // optional fixed64 destination = 4;
+    // optional .ConnectionData sourceConnection = 4;
+    boolean hasSourceConnection();
+    fish.finder.proto.Message.ConnectionData getSourceConnection();
+    fish.finder.proto.Message.ConnectionDataOrBuilder getSourceConnectionOrBuilder();
+    
+    // optional fixed64 destination = 5;
     boolean hasDestination();
     long getDestination();
     
-    // optional bytes data = 5;
+    // optional bytes data = 6;
     boolean hasData();
     com.google.protobuf.ByteString getData();
   }
@@ -171,21 +176,34 @@ public final class Message {
       return source_;
     }
     
-    // optional fixed64 destination = 4;
-    public static final int DESTINATION_FIELD_NUMBER = 4;
+    // optional .ConnectionData sourceConnection = 4;
+    public static final int SOURCECONNECTION_FIELD_NUMBER = 4;
+    private fish.finder.proto.Message.ConnectionData sourceConnection_;
+    public boolean hasSourceConnection() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    public fish.finder.proto.Message.ConnectionData getSourceConnection() {
+      return sourceConnection_;
+    }
+    public fish.finder.proto.Message.ConnectionDataOrBuilder getSourceConnectionOrBuilder() {
+      return sourceConnection_;
+    }
+    
+    // optional fixed64 destination = 5;
+    public static final int DESTINATION_FIELD_NUMBER = 5;
     private long destination_;
     public boolean hasDestination() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     public long getDestination() {
       return destination_;
     }
     
-    // optional bytes data = 5;
-    public static final int DATA_FIELD_NUMBER = 5;
+    // optional bytes data = 6;
+    public static final int DATA_FIELD_NUMBER = 6;
     private com.google.protobuf.ByteString data_;
     public boolean hasData() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     public com.google.protobuf.ByteString getData() {
       return data_;
@@ -195,6 +213,7 @@ public final class Message {
       ttl_ = 0;
       type_ = fish.finder.proto.Message.MessageType.PING;
       source_ = 0L;
+      sourceConnection_ = fish.finder.proto.Message.ConnectionData.getDefaultInstance();
       destination_ = 0L;
       data_ = com.google.protobuf.ByteString.EMPTY;
     }
@@ -215,6 +234,12 @@ public final class Message {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (hasSourceConnection()) {
+        if (!getSourceConnection().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -232,10 +257,13 @@ public final class Message {
         output.writeFixed64(3, source_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeFixed64(4, destination_);
+        output.writeMessage(4, sourceConnection_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBytes(5, data_);
+        output.writeFixed64(5, destination_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(6, data_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -260,11 +288,15 @@ public final class Message {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeFixed64Size(4, destination_);
+          .computeMessageSize(4, sourceConnection_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(5, data_);
+          .computeFixed64Size(5, destination_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, data_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -382,6 +414,7 @@ public final class Message {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getSourceConnectionFieldBuilder();
         }
       }
       private static Builder create() {
@@ -396,10 +429,16 @@ public final class Message {
         bitField0_ = (bitField0_ & ~0x00000002);
         source_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
-        destination_ = 0L;
+        if (sourceConnectionBuilder_ == null) {
+          sourceConnection_ = fish.finder.proto.Message.ConnectionData.getDefaultInstance();
+        } else {
+          sourceConnectionBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000008);
-        data_ = com.google.protobuf.ByteString.EMPTY;
+        destination_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000010);
+        data_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
       
@@ -453,9 +492,17 @@ public final class Message {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        result.destination_ = destination_;
+        if (sourceConnectionBuilder_ == null) {
+          result.sourceConnection_ = sourceConnection_;
+        } else {
+          result.sourceConnection_ = sourceConnectionBuilder_.build();
+        }
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
+        }
+        result.destination_ = destination_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
         }
         result.data_ = data_;
         result.bitField0_ = to_bitField0_;
@@ -483,6 +530,9 @@ public final class Message {
         if (other.hasSource()) {
           setSource(other.getSource());
         }
+        if (other.hasSourceConnection()) {
+          mergeSourceConnection(other.getSourceConnection());
+        }
         if (other.hasDestination()) {
           setDestination(other.getDestination());
         }
@@ -505,6 +555,12 @@ public final class Message {
         if (!hasSource()) {
           
           return false;
+        }
+        if (hasSourceConnection()) {
+          if (!getSourceConnection().isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -553,13 +609,22 @@ public final class Message {
               source_ = input.readFixed64();
               break;
             }
-            case 33: {
-              bitField0_ |= 0x00000008;
+            case 34: {
+              fish.finder.proto.Message.ConnectionData.Builder subBuilder = fish.finder.proto.Message.ConnectionData.newBuilder();
+              if (hasSourceConnection()) {
+                subBuilder.mergeFrom(getSourceConnection());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setSourceConnection(subBuilder.buildPartial());
+              break;
+            }
+            case 41: {
+              bitField0_ |= 0x00000010;
               destination_ = input.readFixed64();
               break;
             }
-            case 42: {
-              bitField0_ |= 0x00000010;
+            case 50: {
+              bitField0_ |= 0x00000020;
               data_ = input.readBytes();
               break;
             }
@@ -635,31 +700,121 @@ public final class Message {
         return this;
       }
       
-      // optional fixed64 destination = 4;
+      // optional .ConnectionData sourceConnection = 4;
+      private fish.finder.proto.Message.ConnectionData sourceConnection_ = fish.finder.proto.Message.ConnectionData.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          fish.finder.proto.Message.ConnectionData, fish.finder.proto.Message.ConnectionData.Builder, fish.finder.proto.Message.ConnectionDataOrBuilder> sourceConnectionBuilder_;
+      public boolean hasSourceConnection() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      public fish.finder.proto.Message.ConnectionData getSourceConnection() {
+        if (sourceConnectionBuilder_ == null) {
+          return sourceConnection_;
+        } else {
+          return sourceConnectionBuilder_.getMessage();
+        }
+      }
+      public Builder setSourceConnection(fish.finder.proto.Message.ConnectionData value) {
+        if (sourceConnectionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          sourceConnection_ = value;
+          onChanged();
+        } else {
+          sourceConnectionBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      public Builder setSourceConnection(
+          fish.finder.proto.Message.ConnectionData.Builder builderForValue) {
+        if (sourceConnectionBuilder_ == null) {
+          sourceConnection_ = builderForValue.build();
+          onChanged();
+        } else {
+          sourceConnectionBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      public Builder mergeSourceConnection(fish.finder.proto.Message.ConnectionData value) {
+        if (sourceConnectionBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              sourceConnection_ != fish.finder.proto.Message.ConnectionData.getDefaultInstance()) {
+            sourceConnection_ =
+              fish.finder.proto.Message.ConnectionData.newBuilder(sourceConnection_).mergeFrom(value).buildPartial();
+          } else {
+            sourceConnection_ = value;
+          }
+          onChanged();
+        } else {
+          sourceConnectionBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      public Builder clearSourceConnection() {
+        if (sourceConnectionBuilder_ == null) {
+          sourceConnection_ = fish.finder.proto.Message.ConnectionData.getDefaultInstance();
+          onChanged();
+        } else {
+          sourceConnectionBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      public fish.finder.proto.Message.ConnectionData.Builder getSourceConnectionBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getSourceConnectionFieldBuilder().getBuilder();
+      }
+      public fish.finder.proto.Message.ConnectionDataOrBuilder getSourceConnectionOrBuilder() {
+        if (sourceConnectionBuilder_ != null) {
+          return sourceConnectionBuilder_.getMessageOrBuilder();
+        } else {
+          return sourceConnection_;
+        }
+      }
+      private com.google.protobuf.SingleFieldBuilder<
+          fish.finder.proto.Message.ConnectionData, fish.finder.proto.Message.ConnectionData.Builder, fish.finder.proto.Message.ConnectionDataOrBuilder> 
+          getSourceConnectionFieldBuilder() {
+        if (sourceConnectionBuilder_ == null) {
+          sourceConnectionBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              fish.finder.proto.Message.ConnectionData, fish.finder.proto.Message.ConnectionData.Builder, fish.finder.proto.Message.ConnectionDataOrBuilder>(
+                  sourceConnection_,
+                  getParentForChildren(),
+                  isClean());
+          sourceConnection_ = null;
+        }
+        return sourceConnectionBuilder_;
+      }
+      
+      // optional fixed64 destination = 5;
       private long destination_ ;
       public boolean hasDestination() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       public long getDestination() {
         return destination_;
       }
       public Builder setDestination(long value) {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         destination_ = value;
         onChanged();
         return this;
       }
       public Builder clearDestination() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000010);
         destination_ = 0L;
         onChanged();
         return this;
       }
       
-      // optional bytes data = 5;
+      // optional bytes data = 6;
       private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       public boolean hasData() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       public com.google.protobuf.ByteString getData() {
         return data_;
@@ -668,13 +823,13 @@ public final class Message {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000010;
+  bitField0_ |= 0x00000020;
         data_ = value;
         onChanged();
         return this;
       }
       public Builder clearData() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000020);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;
@@ -2939,19 +3094,21 @@ public final class Message {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\037fish/finder/proto/Message.proto\"e\n\007Req" +
-      "uest\022\013\n\003ttl\030\001 \002(\005\022\032\n\004type\030\002 \002(\0162\014.Messag" +
-      "eType\022\016\n\006source\030\003 \002(\006\022\023\n\013destination\030\004 \001" +
-      "(\006\022\014\n\004data\030\005 \001(\014\"[\n\017RequestFilePart\022\030\n\004f" +
-      "ile\030\001 \002(\0132\n.FileEntry\022\020\n\010fromByte\030\002 \002(\003\022" +
-      "\016\n\006toByte\030\003 \002(\003\022\014\n\004data\030\004 \001(\014\",\n\016Connect" +
-      "ionData\022\014\n\004host\030\001 \002(\t\022\014\n\004port\030\002 \002(\005\",\n\rS" +
-      "earchResults\022\033\n\007results\030\001 \003(\0132\n.FileEntr" +
-      "y\"C\n\tFileEntry\022\014\n\004name\030\001 \002(\t\022\014\n\004hash\030\002 \002" +
-      "(\014\022\014\n\004size\030\003 \002(\003\022\014\n\004host\030\004 \001(\006*i\n\013Messag",
-      "eType\022\010\n\004PING\020\000\022\010\n\004PONG\020\001\022\n\n\006SEARCH\020\002\022\013\n" +
-      "\007RESULTS\020\003\022\025\n\021REQUEST_FILE_PART\020\004\022\026\n\022RES" +
-      "PONSE_FILE_PART\020\005B\023\n\021fish.finder.proto"
+      "\n\037fish/finder/proto/Message.proto\"\220\001\n\007Re" +
+      "quest\022\013\n\003ttl\030\001 \002(\005\022\032\n\004type\030\002 \002(\0162\014.Messa" +
+      "geType\022\016\n\006source\030\003 \002(\006\022)\n\020sourceConnecti" +
+      "on\030\004 \001(\0132\017.ConnectionData\022\023\n\013destination" +
+      "\030\005 \001(\006\022\014\n\004data\030\006 \001(\014\"[\n\017RequestFilePart\022" +
+      "\030\n\004file\030\001 \002(\0132\n.FileEntry\022\020\n\010fromByte\030\002 " +
+      "\002(\003\022\016\n\006toByte\030\003 \002(\003\022\014\n\004data\030\004 \001(\014\",\n\016Con" +
+      "nectionData\022\014\n\004host\030\001 \002(\t\022\014\n\004port\030\002 \002(\005\"" +
+      ",\n\rSearchResults\022\033\n\007results\030\001 \003(\0132\n.File" +
+      "Entry\"C\n\tFileEntry\022\014\n\004name\030\001 \002(\t\022\014\n\004hash",
+      "\030\002 \002(\014\022\014\n\004size\030\003 \002(\003\022\014\n\004host\030\004 \001(\006*i\n\013Me" +
+      "ssageType\022\010\n\004PING\020\000\022\010\n\004PONG\020\001\022\n\n\006SEARCH\020" +
+      "\002\022\013\n\007RESULTS\020\003\022\025\n\021REQUEST_FILE_PART\020\004\022\026\n" +
+      "\022RESPONSE_FILE_PART\020\005B\023\n\021fish.finder.pro" +
+      "to"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2963,7 +3120,7 @@ public final class Message {
           internal_static_Request_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_Request_descriptor,
-              new java.lang.String[] { "Ttl", "Type", "Source", "Destination", "Data", },
+              new java.lang.String[] { "Ttl", "Type", "Source", "SourceConnection", "Destination", "Data", },
               fish.finder.proto.Message.Request.class,
               fish.finder.proto.Message.Request.Builder.class);
           internal_static_RequestFilePart_descriptor =

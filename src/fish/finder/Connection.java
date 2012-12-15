@@ -29,6 +29,16 @@ public class Connection implements Runnable {
   
   private long lastMessage = 0;
   private int messageCount = 0;
+  
+  private long bytesIn, bytesOut = 0;
+
+  public long getBytesIn() {
+    return bytesIn;
+  }
+
+  public long getBytesOut() {
+    return bytesOut;
+  }
 
   public long getRemoteIdentity() {
     return remoteIdentity;
@@ -50,6 +60,10 @@ public class Connection implements Runnable {
       send(response);
       success();
     }
+  }
+  
+  public Connection(Client client, ConnectionData data) {
+    this(client, data.getHost(), data.getPort());
   }
   
   public Connection(Client client, String host, int port) {
@@ -85,9 +99,13 @@ public class Connection implements Runnable {
     new Thread(this).start();
   }
 
-  public void close() throws IOException {
+  public void close() {
     open = false;
-    socket.close();
+    try {
+      socket.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public ConnectionData getConnectionData() {
@@ -112,16 +130,18 @@ public class Connection implements Runnable {
     try {
       OutputStream out = socket.getOutputStream();
       synchronized (out) {
-        if (DEBUG) {
-          System.out.println(toString() + ": Sending: \n" + r.toString());
-        }
         byte[] b = r.toByteArray();
+        if (DEBUG) {
+          System.out.println(toString() + ": Sending(" + b.length + "): \n" + r.toString());
+        }
         int length = b.length;
+        bytesOut += b.length + 2;
         out.write((length & 0xff00) >> 8);
         out.write((length & 0x00ff));
         out.write(b);
       }
     } catch (IOException e) {
+      e.printStackTrace();
       open = false;
     }
   }
@@ -133,7 +153,11 @@ public class Connection implements Runnable {
       if( length < 0) return null;
 
       byte[] b = new byte[length];
-      socket.getInputStream().read(b);
+      int readData = 0;
+      while (readData < length) {
+        readData += socket.getInputStream().read(b, readData, b.length - readData);
+      }
+      bytesIn += length + 2;
       Request r = Request.parseFrom(b);
       if (DEBUG) {
         System.out.println(toString() + ": ReadMessage(" + length + "): \n" + 
@@ -142,6 +166,7 @@ public class Connection implements Runnable {
       return r;
     } catch (IOException e) {
       open = false;
+     // e.printStackTrace();
       return null;
     }
   }
@@ -152,7 +177,10 @@ public class Connection implements Runnable {
 
   private boolean handleMessage() {
     Request message = readMessage();
-    if (message == null) return false;
+    if (message == null) {
+      System.err.println(toString() + ": readMessage = NULL");
+      return false;
+    }
     Request response = null;
 
     client.getRoute().learn(this, message);
@@ -189,6 +217,7 @@ public class Connection implements Runnable {
               .build();
           send(response);
           break;
+
         case MessageType.RESULTS_VALUE:
           try {
             SearchResults remoteResults = null;
@@ -199,14 +228,19 @@ public class Connection implements Runnable {
             e.printStackTrace();
           }
           break;
+
         case MessageType.REQUEST_FILE_PART_VALUE:
           try {
-            RequestFilePart responseData = 
-                client.getFileChunk(
-                    RequestFilePart.parseFrom(message.getData()));
+            RequestFilePart requestData = 
+                RequestFilePart.parseFrom(message.getData());
+            RequestFilePart responseData = client.getFileChunk(requestData);
+            if (responseData == null) {
+              System.err.println("Unable to get file chunk for " + requestData);
+              break;
+            }
             response = client.createRequest(MessageType.RESPONSE_FILE_PART)
                 .setDestination(message.getSource())
-                .setData(responseData.getData())
+                .setData(responseData.toByteString())
                 .build();
             send(response);
           } catch (InvalidProtocolBufferException e) {
@@ -219,8 +253,9 @@ public class Connection implements Runnable {
           break;
 
         default: 
-          System.out.println(toString() + ": unhandled message: \n" + 
+          System.err.println(toString() + ": unhandled message: \n" + 
                              message.toString());
+          return false;
       }
       if (message.getDestination() == Connection.BROADCAST) {
         client.getRoute().route(message, this);
@@ -231,12 +266,33 @@ public class Connection implements Runnable {
   
   @Override
   public void run() {
-    while (!socket.isClosed() && open && handleMessage()) {
+    boolean handleMessage = false;
+    while (!socket.isClosed()) {
+      handleMessage = handleMessage();
+      if (!open || !handleMessage) {
+        break;
+      }
       messageCount++;
       lastMessage = System.currentTimeMillis();
     }
-    if (DEBUG) {
-      System.out.println(toString() + ": Connection lost");
+    String lost = toString() + ": Connection lost";
+    if (socket.isClosed()) {
+      lost += "Socket closed";
+    }
+    if (!open) {
+      lost += " Open=false";
+    }
+    if (!handleMessage) {
+      lost += " Unhandled mesasge";
+    }
+    System.err.println(lost);
+    if (!socket.isClosed()) {
+      try {
+        socket.close();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
     client.getRoute().connectionLost(this);
   }

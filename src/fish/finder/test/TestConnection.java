@@ -16,8 +16,7 @@ public class TestConnection {
   public void testClientConnect() throws ClassNotFoundException, IOException {
     Connection.DEBUG = true;
     Client.DEBUG = true;
-    new File("null-file.object").delete();
-    Client c = new Client(Client.LISTEN_PORT, "null-file.object");
+    Client c = new Client(Client.LISTEN_PORT, null);
     Connection connection = new Connection(c, "localhost", Client.LISTEN_PORT);
     assertTrue(connection.isOpen());
     assertTrue(c.getRoute().directConnections() > 0);
@@ -25,14 +24,12 @@ public class TestConnection {
 
     connection.close();
     c.close();
-    new File("null-file.object").delete();
   }
 
   @Test
   public void testDisconnect() throws ClassNotFoundException, IOException, InterruptedException {
     Connection.DEBUG = true;
-    new File("null-file.object").delete();
-    Client c = new Client(Client.LISTEN_PORT, "null-file.object");
+    Client c = new Client(Client.LISTEN_PORT, null);
     Connection connection = new Connection(c, "localhost", Client.LISTEN_PORT);
 
     assertTrue(connection.isOpen());
@@ -46,7 +43,6 @@ public class TestConnection {
     assertFalse(connection.isOpen());
     assertTrue(c.getRoute().directConnections()  == 0);
     c.close();
-    new File("null-file.object").delete();
   }
   
 

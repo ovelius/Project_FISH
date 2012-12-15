@@ -5,7 +5,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
+import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.MessageType;
 import fish.finder.proto.Message.Request;
 
@@ -16,18 +18,30 @@ public class Route {
   private int routedMessage = 0;
   private HashMap<Long, Long> routes = new HashMap<Long, Long>();
   private HashMap<Long, Integer> bestRouteTTL = new HashMap<Long, Integer>();
+  private HashMap<Long, ConnectionData> connectionData 
+      = new HashMap<Long, ConnectionData>();
   
   private HashMap<Long, Connection> idToConnection =
       new HashMap<Long, Connection>();
 
-  public static Request reduceTTL(Request message) {
+  public static Request.Builder reduceTTL(Request message) {
     int ttl = message.getTtl();
-    return Request.newBuilder(message).setTtl(ttl - 1).build(); 
+    return Request.newBuilder(message).setTtl(ttl - 1); 
   }
   public void addConnection(Connection connection) {
     if (DEBUG) {
       System.out.println(toString() + ": Added direct link to: " + 
                          connection.getRemoteIdentity());
+    }
+    Connection c = idToConnection.get(connection.getRemoteIdentity());
+    if (c != null) {
+      if (DEBUG) {
+        System.out.println(toString() + ": Replaced connection to " + 
+                           c.getRemoteIdentity());
+      }
+      if (c != null) {
+        c.close();
+      }
     }
     idToConnection.put(connection.getRemoteIdentity(), connection);
   }
@@ -38,6 +52,15 @@ public class Route {
 
   public void connectionLost(Connection c) {
     idToConnection.remove(c.getRemoteIdentity());
+    HashSet<Long> remoteRouteDestinations = new HashSet<Long>();
+      for (Long dst : routes.keySet()) {
+        if (routes.get(dst) == c.getRemoteIdentity()) {
+          remoteRouteDestinations.add(dst);
+        }
+      }
+    for (Long dst : remoteRouteDestinations) {
+      routes.remove(dst);
+    }
   }
   
   public int reachableNodes() {
@@ -58,6 +81,15 @@ public class Route {
     return peers;
   }
 
+  private void putRouteAndConnectionData(Request message, Connection connection) {
+    routes.put(message.getSource(), connection.getRemoteIdentity());
+    bestRouteTTL.put(message.getSource(), message.getTtl());
+    if (message.getSource() != connection.getRemoteIdentity() && 
+        message.hasSourceConnection()) {
+      connectionData.put(message.getSource(), connection.getConnectionData());
+    }
+  }
+  
   public boolean learn(Connection connection, Request message) {
     if (connection.getRemoteIdentity() != message.getSource() &&
         !idToConnection.containsKey(message.getSource())) {
@@ -66,11 +98,7 @@ public class Route {
           System.out.println(toString() + ": Added link to: " + 
             message.getSource() + " via " + connection.getRemoteIdentity()); 
         }
-        if (message.getSource() == connection.getLocalIdentity()) {
-          System.err.println("Based on packet from "+connection.getRemoteIdentity()+"about to add route to self: \n" + message);
-        }
-        routes.put(message.getSource(), connection.getRemoteIdentity());
-        bestRouteTTL.put(message.getSource(), message.getTtl());
+        putRouteAndConnectionData(message, connection);
         return true;
       } else {
         int ttl = bestRouteTTL.get(message.getSource());
@@ -79,8 +107,7 @@ public class Route {
             System.out.println(toString() + ": Replaced link to: " + 
               message.getSource() + " via " + connection.getRemoteIdentity()); 
           }
-          routes.put(message.getSource(), connection.getRemoteIdentity());
-          bestRouteTTL.put(message.getSource(), message.getTtl());
+          putRouteAndConnectionData(message, connection);
           return true;
         }
       }
@@ -115,9 +142,6 @@ public class Route {
     return idToConnection.containsKey(id) || routes.containsKey(id);
   }
 
-  private void broadCast(Request r) {
-    broadCast(r, null);
-  }
   private void broadCast(Request r, Connection sourceConnection) {
     for (Connection connection : idToConnection.values()) {
       if (connection.getRemoteIdentity() == r.getSource()) continue;
@@ -133,7 +157,14 @@ public class Route {
       System.err.println(toString() + ": TTL expired: \n" + message.toString());
       return;
     }
-    message = reduceTTL(message);
+    Request.Builder newMessageBuilder = reduceTTL(message);
+    // Put connection data in each message.
+    if (sourceConnection != null && 
+        message.getSource() == sourceConnection.getRemoteIdentity()) {
+      newMessageBuilder
+          .setSourceConnection(sourceConnection.getConnectionData());
+    }
+    message = newMessageBuilder.build();
 
     if (message.getDestination() == Connection.BROADCAST) {
       broadCast(message, sourceConnection);

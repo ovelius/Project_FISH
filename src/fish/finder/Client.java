@@ -41,6 +41,14 @@ public class Client implements Runnable {
   private HashMap<Long, FileMessageChannel> fileChannels = 
       new HashMap<Long, FileMessageChannel>();
   
+  public HashMap<Long, FileMessageChannel> getFileChannels() {
+    return fileChannels;
+  }
+
+  public String getNodeCache() {
+    return nodeCache;
+  }
+
   private long localIdentity;
 
   public Client(int port) throws ClassNotFoundException, IOException {
@@ -61,15 +69,17 @@ public class Client implements Runnable {
       localIdentity = new Random().nextLong();
     }
 
-    File fileCache = new File(cacheFile);
-    if (fileCache.exists()) {
-      ObjectInputStream ois = 
-          new ObjectInputStream(new FileInputStream(nodeCache));
-      nodes  = (HashSet<ConnectionData>)ois.readObject(); 
-      if (DEBUG) {
-        System.out.println(toString() + ": read " + nodes.size() + " nodes from cache.");
+    if (cacheFile != null) {
+      File fileCache = new File(cacheFile);
+      if (fileCache.exists()) {
+        ObjectInputStream ois = 
+            new ObjectInputStream(new FileInputStream(nodeCache));
+        nodes  = (HashSet<ConnectionData>)ois.readObject(); 
+        if (DEBUG) {
+          System.out.println(toString() + ": read " + nodes.size() + " nodes from cache.");
+        }
+        ois.close();
       }
-      ois.close();
     }
     /*if (nodes.isEmpty()) {
       nodes.add("o.is-a-geek.com");
@@ -77,12 +87,13 @@ public class Client implements Runnable {
     new Thread(this).start();
   }
 
-  public void downloadFile(FileEntry f, String dir) {
+  public String downloadFile(FileEntry f, String dir) {
     synchronized (fileChannels) {
       long from = f.getHost();
       FileMessageChannel channel = new FileMessageChannel(this, f, dir);
       fileChannels.put(from, channel);
       channel.startTransfer();
+      return channel.getFullFileName();
     }
   }
   
@@ -138,25 +149,25 @@ public class Client implements Runnable {
     connections.addAll(route.getDirectConnections());
     for (Connection c : connections) {
       if (c != null && c.isOpen()) {
-        try {
-            c.close();
-        } catch (IOException e) { }
+        c.close();
       }
       if (!c.isHost()) {
         nodes.add(c.getConnectionData());
       }
     }
-    File fileCache = new File(nodeCache);
-    ObjectOutputStream oos;
-    try {
-      oos = new ObjectOutputStream(new FileOutputStream(fileCache));
-      oos.writeObject(nodes);
-    } catch (FileNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    if (nodeCache != null) {
+      File fileCache = new File(nodeCache);
+      ObjectOutputStream oos;
+      try {
+        oos = new ObjectOutputStream(new FileOutputStream(fileCache));
+        oos.writeObject(nodes);
+      } catch (FileNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
   }
 
