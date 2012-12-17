@@ -9,8 +9,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.FileEntry;
+import fish.finder.proto.Message.FishMessage;
 import fish.finder.proto.Message.MessageType;
-import fish.finder.proto.Message.Request;
 import fish.finder.proto.Message.RequestFilePart;
 import fish.finder.proto.Message.SearchResults;
 
@@ -53,10 +53,10 @@ public class Connection implements Runnable {
     this.client = client;
     this.host = true;
 
-    Request request = readMessage();
+    FishMessage request = readMessage();
     if (request != null && request.getType() == MessageType.PING) {
       remoteIdentity = request.getSource();
-      Request response = client.createRequest(MessageType.PONG).build();
+      FishMessage response = client.createRequest(MessageType.PONG).build();
       send(response);
       success();
     }
@@ -74,9 +74,9 @@ public class Connection implements Runnable {
       this.client = client;
 
       // Communicate identity.
-      Request request = client.createRequest(MessageType.PING).build();
+      FishMessage request = client.createRequest(MessageType.PING).build();
       send(request);
-      Request response = readMessage();
+      FishMessage response = readMessage();
       if (response != null && response.getType() == MessageType.PONG) {
         remoteIdentity = response.getSource();
         success();
@@ -126,7 +126,7 @@ public class Connection implements Runnable {
     return socket.getPort();
   }
 
-  public void send(Request r) {
+  public void send(FishMessage r) {
     try {
       OutputStream out = socket.getOutputStream();
       synchronized (out) {
@@ -146,7 +146,7 @@ public class Connection implements Runnable {
     }
   }
   
-  public synchronized Request readMessage() {
+  public synchronized FishMessage readMessage() {
     try {
       int length = (socket.getInputStream().read() << 8) + 
                    socket.getInputStream().read();
@@ -158,7 +158,7 @@ public class Connection implements Runnable {
         readData += socket.getInputStream().read(b, readData, b.length - readData);
       }
       bytesIn += length + 2;
-      Request r = Request.parseFrom(b);
+      FishMessage r = FishMessage.parseFrom(b);
       if (DEBUG) {
         System.out.println(toString() + ": ReadMessage(" + length + "): \n" + 
                            r.toString());
@@ -176,12 +176,12 @@ public class Connection implements Runnable {
   }
 
   private boolean handleMessage() {
-    Request message = readMessage();
+    FishMessage message = readMessage();
     if (message == null) {
       System.err.println(toString() + ": readMessage = NULL");
       return false;
     }
-    Request response = null;
+    FishMessage response = null;
 
     client.getRoute().learn(this, message);
 

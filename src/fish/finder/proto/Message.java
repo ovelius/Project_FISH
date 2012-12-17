@@ -89,7 +89,7 @@ public final class Message {
     // @@protoc_insertion_point(enum_scope:MessageType)
   }
   
-  public interface RequestOrBuilder
+  public interface FishMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
     
     // required int32 ttl = 1;
@@ -117,32 +117,32 @@ public final class Message {
     boolean hasData();
     com.google.protobuf.ByteString getData();
   }
-  public static final class Request extends
+  public static final class FishMessage extends
       com.google.protobuf.GeneratedMessage
-      implements RequestOrBuilder {
-    // Use Request.newBuilder() to construct.
-    private Request(Builder builder) {
+      implements FishMessageOrBuilder {
+    // Use FishMessage.newBuilder() to construct.
+    private FishMessage(Builder builder) {
       super(builder);
     }
-    private Request(boolean noInit) {}
+    private FishMessage(boolean noInit) {}
     
-    private static final Request defaultInstance;
-    public static Request getDefaultInstance() {
+    private static final FishMessage defaultInstance;
+    public static FishMessage getDefaultInstance() {
       return defaultInstance;
     }
     
-    public Request getDefaultInstanceForType() {
+    public FishMessage getDefaultInstanceForType() {
       return defaultInstance;
     }
     
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return fish.finder.proto.Message.internal_static_Request_descriptor;
+      return fish.finder.proto.Message.internal_static_FishMessage_descriptor;
     }
     
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return fish.finder.proto.Message.internal_static_Request_fieldAccessorTable;
+      return fish.finder.proto.Message.internal_static_FishMessage_fieldAccessorTable;
     }
     
     private int bitField0_;
@@ -310,41 +310,41 @@ public final class Message {
       return super.writeReplace();
     }
     
-    public static fish.finder.proto.Message.Request parseFrom(
+    public static fish.finder.proto.Message.FishMessage parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return newBuilder().mergeFrom(data).buildParsed();
     }
-    public static fish.finder.proto.Message.Request parseFrom(
+    public static fish.finder.proto.Message.FishMessage parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return newBuilder().mergeFrom(data, extensionRegistry)
                .buildParsed();
     }
-    public static fish.finder.proto.Message.Request parseFrom(byte[] data)
+    public static fish.finder.proto.Message.FishMessage parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return newBuilder().mergeFrom(data).buildParsed();
     }
-    public static fish.finder.proto.Message.Request parseFrom(
+    public static fish.finder.proto.Message.FishMessage parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return newBuilder().mergeFrom(data, extensionRegistry)
                .buildParsed();
     }
-    public static fish.finder.proto.Message.Request parseFrom(java.io.InputStream input)
+    public static fish.finder.proto.Message.FishMessage parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return newBuilder().mergeFrom(input).buildParsed();
     }
-    public static fish.finder.proto.Message.Request parseFrom(
+    public static fish.finder.proto.Message.FishMessage parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return newBuilder().mergeFrom(input, extensionRegistry)
                .buildParsed();
     }
-    public static fish.finder.proto.Message.Request parseDelimitedFrom(java.io.InputStream input)
+    public static fish.finder.proto.Message.FishMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       Builder builder = newBuilder();
       if (builder.mergeDelimitedFrom(input)) {
@@ -353,7 +353,7 @@ public final class Message {
         return null;
       }
     }
-    public static fish.finder.proto.Message.Request parseDelimitedFrom(
+    public static fish.finder.proto.Message.FishMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -364,12 +364,12 @@ public final class Message {
         return null;
       }
     }
-    public static fish.finder.proto.Message.Request parseFrom(
+    public static fish.finder.proto.Message.FishMessage parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return newBuilder().mergeFrom(input).buildParsed();
     }
-    public static fish.finder.proto.Message.Request parseFrom(
+    public static fish.finder.proto.Message.FishMessage parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -379,7 +379,7 @@ public final class Message {
     
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(fish.finder.proto.Message.Request prototype) {
+    public static Builder newBuilder(fish.finder.proto.Message.FishMessage prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -392,18 +392,18 @@ public final class Message {
     }
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements fish.finder.proto.Message.RequestOrBuilder {
+       implements fish.finder.proto.Message.FishMessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return fish.finder.proto.Message.internal_static_Request_descriptor;
+        return fish.finder.proto.Message.internal_static_FishMessage_descriptor;
       }
       
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return fish.finder.proto.Message.internal_static_Request_fieldAccessorTable;
+        return fish.finder.proto.Message.internal_static_FishMessage_fieldAccessorTable;
       }
       
-      // Construct using fish.finder.proto.Message.Request.newBuilder()
+      // Construct using fish.finder.proto.Message.FishMessage.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -448,24 +448,24 @@ public final class Message {
       
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return fish.finder.proto.Message.Request.getDescriptor();
+        return fish.finder.proto.Message.FishMessage.getDescriptor();
       }
       
-      public fish.finder.proto.Message.Request getDefaultInstanceForType() {
-        return fish.finder.proto.Message.Request.getDefaultInstance();
+      public fish.finder.proto.Message.FishMessage getDefaultInstanceForType() {
+        return fish.finder.proto.Message.FishMessage.getDefaultInstance();
       }
       
-      public fish.finder.proto.Message.Request build() {
-        fish.finder.proto.Message.Request result = buildPartial();
+      public fish.finder.proto.Message.FishMessage build() {
+        fish.finder.proto.Message.FishMessage result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
       
-      private fish.finder.proto.Message.Request buildParsed()
+      private fish.finder.proto.Message.FishMessage buildParsed()
           throws com.google.protobuf.InvalidProtocolBufferException {
-        fish.finder.proto.Message.Request result = buildPartial();
+        fish.finder.proto.Message.FishMessage result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(
             result).asInvalidProtocolBufferException();
@@ -473,8 +473,8 @@ public final class Message {
         return result;
       }
       
-      public fish.finder.proto.Message.Request buildPartial() {
-        fish.finder.proto.Message.Request result = new fish.finder.proto.Message.Request(this);
+      public fish.finder.proto.Message.FishMessage buildPartial() {
+        fish.finder.proto.Message.FishMessage result = new fish.finder.proto.Message.FishMessage(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -511,16 +511,16 @@ public final class Message {
       }
       
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof fish.finder.proto.Message.Request) {
-          return mergeFrom((fish.finder.proto.Message.Request)other);
+        if (other instanceof fish.finder.proto.Message.FishMessage) {
+          return mergeFrom((fish.finder.proto.Message.FishMessage)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
       
-      public Builder mergeFrom(fish.finder.proto.Message.Request other) {
-        if (other == fish.finder.proto.Message.Request.getDefaultInstance()) return this;
+      public Builder mergeFrom(fish.finder.proto.Message.FishMessage other) {
+        if (other == fish.finder.proto.Message.FishMessage.getDefaultInstance()) return this;
         if (other.hasTtl()) {
           setTtl(other.getTtl());
         }
@@ -835,15 +835,15 @@ public final class Message {
         return this;
       }
       
-      // @@protoc_insertion_point(builder_scope:Request)
+      // @@protoc_insertion_point(builder_scope:FishMessage)
     }
     
     static {
-      defaultInstance = new Request(true);
+      defaultInstance = new FishMessage(true);
       defaultInstance.initFields();
     }
     
-    // @@protoc_insertion_point(class_scope:Request)
+    // @@protoc_insertion_point(class_scope:FishMessage)
   }
   
   public interface RequestFilePartOrBuilder
@@ -3061,10 +3061,10 @@ public final class Message {
   }
   
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_Request_descriptor;
+    internal_static_FishMessage_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_Request_fieldAccessorTable;
+      internal_static_FishMessage_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_RequestFilePart_descriptor;
   private static
@@ -3094,35 +3094,35 @@ public final class Message {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\037fish/finder/proto/Message.proto\"\220\001\n\007Re" +
-      "quest\022\013\n\003ttl\030\001 \002(\005\022\032\n\004type\030\002 \002(\0162\014.Messa" +
-      "geType\022\016\n\006source\030\003 \002(\006\022)\n\020sourceConnecti" +
-      "on\030\004 \001(\0132\017.ConnectionData\022\023\n\013destination" +
-      "\030\005 \001(\006\022\014\n\004data\030\006 \001(\014\"[\n\017RequestFilePart\022" +
-      "\030\n\004file\030\001 \002(\0132\n.FileEntry\022\020\n\010fromByte\030\002 " +
-      "\002(\003\022\016\n\006toByte\030\003 \002(\003\022\014\n\004data\030\004 \001(\014\",\n\016Con" +
-      "nectionData\022\014\n\004host\030\001 \002(\t\022\014\n\004port\030\002 \002(\005\"" +
-      ",\n\rSearchResults\022\033\n\007results\030\001 \003(\0132\n.File" +
-      "Entry\"C\n\tFileEntry\022\014\n\004name\030\001 \002(\t\022\014\n\004hash",
-      "\030\002 \002(\014\022\014\n\004size\030\003 \002(\003\022\014\n\004host\030\004 \001(\006*i\n\013Me" +
-      "ssageType\022\010\n\004PING\020\000\022\010\n\004PONG\020\001\022\n\n\006SEARCH\020" +
-      "\002\022\013\n\007RESULTS\020\003\022\025\n\021REQUEST_FILE_PART\020\004\022\026\n" +
-      "\022RESPONSE_FILE_PART\020\005B\023\n\021fish.finder.pro" +
-      "to"
+      "\n\037fish/finder/proto/Message.proto\"\224\001\n\013Fi" +
+      "shMessage\022\013\n\003ttl\030\001 \002(\005\022\032\n\004type\030\002 \002(\0162\014.M" +
+      "essageType\022\016\n\006source\030\003 \002(\006\022)\n\020sourceConn" +
+      "ection\030\004 \001(\0132\017.ConnectionData\022\023\n\013destina" +
+      "tion\030\005 \001(\006\022\014\n\004data\030\006 \001(\014\"[\n\017RequestFileP" +
+      "art\022\030\n\004file\030\001 \002(\0132\n.FileEntry\022\020\n\010fromByt" +
+      "e\030\002 \002(\003\022\016\n\006toByte\030\003 \002(\003\022\014\n\004data\030\004 \001(\014\",\n" +
+      "\016ConnectionData\022\014\n\004host\030\001 \002(\t\022\014\n\004port\030\002 " +
+      "\002(\005\",\n\rSearchResults\022\033\n\007results\030\001 \003(\0132\n." +
+      "FileEntry\"C\n\tFileEntry\022\014\n\004name\030\001 \002(\t\022\014\n\004",
+      "hash\030\002 \002(\014\022\014\n\004size\030\003 \002(\003\022\014\n\004host\030\004 \001(\006*i" +
+      "\n\013MessageType\022\010\n\004PING\020\000\022\010\n\004PONG\020\001\022\n\n\006SEA" +
+      "RCH\020\002\022\013\n\007RESULTS\020\003\022\025\n\021REQUEST_FILE_PART\020" +
+      "\004\022\026\n\022RESPONSE_FILE_PART\020\005B\023\n\021fish.finder" +
+      ".proto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_Request_descriptor =
+          internal_static_FishMessage_descriptor =
             getDescriptor().getMessageTypes().get(0);
-          internal_static_Request_fieldAccessorTable = new
+          internal_static_FishMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_Request_descriptor,
+              internal_static_FishMessage_descriptor,
               new java.lang.String[] { "Ttl", "Type", "Source", "SourceConnection", "Destination", "Data", },
-              fish.finder.proto.Message.Request.class,
-              fish.finder.proto.Message.Request.Builder.class);
+              fish.finder.proto.Message.FishMessage.class,
+              fish.finder.proto.Message.FishMessage.Builder.class);
           internal_static_RequestFilePart_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_RequestFilePart_fieldAccessorTable = new

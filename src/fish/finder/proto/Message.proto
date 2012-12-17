@@ -11,7 +11,7 @@ enum MessageType {
   RESPONSE_FILE_PART = 5;
 }
 
-message Request {
+message FishMessage {
   required int32 ttl = 1;
   required MessageType type = 2;
 

@@ -24,6 +24,7 @@ import javax.swing.JTextField;
 
 import fish.finder.Client;
 import fish.finder.Connection;
+import fish.finder.FileChannel;
 import fish.finder.FileMessageChannel;
 import fish.finder.Index;
 import fish.finder.Route;
@@ -308,7 +309,8 @@ public class GUI extends JFrame implements Runnable {
 
   private JPanel createNewTransferPanel() {
     JPanel sampleTransfer = new JPanel();
-    sampleTransfer.setBounds(10, 11, 389, 79);
+    int top = 10 + transferPanel.getComponentCount()*80;
+    sampleTransfer.setBounds(10, top, 389, 80);
     transferPanel.add(sampleTransfer);
     sampleTransfer.setLayout(null);
     
@@ -331,9 +333,11 @@ public class GUI extends JFrame implements Runnable {
   }
   
   private HashMap<Long, JPanel> transfers = new HashMap<Long, JPanel>();
-  private void modelFileChannels(HashMap<Long, FileMessageChannel> channels) {
+  private long lastUpdate = System.currentTimeMillis();
+  private HashMap<Long, Long> lastByteCount = new HashMap<Long, Long>();
+  private void modelFileChannels(HashMap<Long, FileChannel> channels) {
     for (Long sender : channels.keySet()) {
-      FileMessageChannel ch = channels.get(sender);
+      FileChannel ch = channels.get(sender);
       JPanel transfer = transfers.get(sender);
       if (transfer == null) {
         transfer = createNewTransferPanel();
@@ -341,13 +345,13 @@ public class GUI extends JFrame implements Runnable {
       }
       JLabel dst = (JLabel) transfer.getComponent(3);
       dst.setText("Destination folder:" + ch.getDirectory());
-      
+
       JLabel stats = (JLabel) transfer.getComponent(2);
-      stats.setText("Precent complete:" + Index.DECIMAL_FORMAT.format(ch.getPercentComplete()));
-      
+      stats.setText("Precent complete:" + Index.DECIMAL_FORMAT.format(100*ch.getPercentComplete()) + "%");
+
       JLabel name = (JLabel) transfer.getComponent(1);
       name.setText("Name: " + ch.getRemoteFile().getName());
-      
+
       JProgressBar progress = (JProgressBar) transfer.getComponent(0);
       progress.setValue((int)(ch.getPercentComplete()*100));
     }

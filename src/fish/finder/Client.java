@@ -19,8 +19,8 @@ import com.google.protobuf.ByteString;
 import fish.finder.gui.SearchResultModel;
 import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.FileEntry;
+import fish.finder.proto.Message.FishMessage;
 import fish.finder.proto.Message.MessageType;
-import fish.finder.proto.Message.Request;
 import fish.finder.proto.Message.RequestFilePart;
 import fish.finder.proto.Message.SearchResults;
 
@@ -38,10 +38,10 @@ public class Client implements Runnable {
   private Index index;
   private ServerSocket socket;
   private Route route;
-  private HashMap<Long, FileMessageChannel> fileChannels = 
-      new HashMap<Long, FileMessageChannel>();
+  private HashMap<Long, FileChannel> fileChannels = 
+      new HashMap<Long, FileChannel>();
   
-  public HashMap<Long, FileMessageChannel> getFileChannels() {
+  public HashMap<Long, FileChannel> getFileChannels() {
     return fileChannels;
   }
 
@@ -62,7 +62,7 @@ public class Client implements Runnable {
     socket = new ServerSocket(port);
     nodes = new HashSet<ConnectionData>();
     index = new Index();
-    route = new Route();
+    route = new Route(this);
 
     localIdentity = Connection.BROADCAST;
     while (localIdentity == Connection.BROADCAST) {
@@ -90,10 +90,10 @@ public class Client implements Runnable {
   public String downloadFile(FileEntry f, String dir) {
     synchronized (fileChannels) {
       long from = f.getHost();
-      FileMessageChannel channel = new FileMessageChannel(this, f, dir);
+      FileChannel channel = new FileMessageChannel(this, f, dir);
       fileChannels.put(from, channel);
       channel.startTransfer();
-      return channel.getFullFileName();
+      return channel.getFullLocalFileName();
     }
   }
   
@@ -101,9 +101,9 @@ public class Client implements Runnable {
     return index.requestFileChunk(request);
   }
   
-  public void processFileChunk(Request message) {
+  public void processFileChunk(FishMessage message) {
     long from = message.getSource();
-    FileMessageChannel channel = fileChannels.get(from);
+    FileChannel channel = fileChannels.get(from);
     channel.receiveChunk(message);
   }
   
@@ -207,8 +207,8 @@ public class Client implements Runnable {
     return socket.getInetAddress().getHostAddress();
   }
 
-  public Request.Builder createRequest(MessageType type) {
-    return Request.newBuilder()
+  public FishMessage.Builder createRequest(MessageType type) {
+    return FishMessage.newBuilder()
         .setTtl(Connection.DEFAULT_TTL)
         .setSource(getLocalIdentity())
         .setType(type);
@@ -216,7 +216,7 @@ public class Client implements Runnable {
 
   public void remoteSearch(String q) {
     searchResults.clear();
-    Request r = createRequest(MessageType.SEARCH)
+    FishMessage r = createRequest(MessageType.SEARCH)
           .setData(ByteString.copyFrom(q.getBytes()))
           .setDestination(Connection.BROADCAST).build();
     route.route(r, null);
@@ -224,7 +224,7 @@ public class Client implements Runnable {
 
   public void broadcastPing() {
     searchResults.clear();
-    Request r = createRequest(MessageType.PING)
+    FishMessage r = createRequest(MessageType.PING)
           .setDestination(Connection.BROADCAST).build();
     route.route(r, null);
   }

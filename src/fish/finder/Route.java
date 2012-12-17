@@ -1,5 +1,6 @@
 package fish.finder;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -8,8 +9,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import fish.finder.proto.Message.ConnectionData;
+import fish.finder.proto.Message.FishMessage;
 import fish.finder.proto.Message.MessageType;
-import fish.finder.proto.Message.Request;
 
 public class Route {
 
@@ -23,10 +24,16 @@ public class Route {
   
   private HashMap<Long, Connection> idToConnection =
       new HashMap<Long, Connection>();
+  
+  private Client client;
 
-  public static Request.Builder reduceTTL(Request message) {
+  public Route(Client c) {
+    this.client = c;
+  }
+  
+  public static FishMessage.Builder reduceTTL(FishMessage message) {
     int ttl = message.getTtl();
-    return Request.newBuilder(message).setTtl(ttl - 1); 
+    return FishMessage.newBuilder(message).setTtl(ttl - 1); 
   }
   public void addConnection(Connection connection) {
     if (DEBUG) {
@@ -52,15 +59,26 @@ public class Route {
 
   public void connectionLost(Connection c) {
     idToConnection.remove(c.getRemoteIdentity());
-    HashSet<Long> remoteRouteDestinations = new HashSet<Long>();
+    final HashSet<Long> remoteRouteDestinations = new HashSet<Long>();
       for (Long dst : routes.keySet()) {
         if (routes.get(dst) == c.getRemoteIdentity()) {
           remoteRouteDestinations.add(dst);
         }
       }
-    for (Long dst : remoteRouteDestinations) {
-      routes.remove(dst);
-    }
+
+    new Thread() { public void run() {
+      for (Long dst : remoteRouteDestinations) {
+        routes.remove(dst);
+        if (connectionData.containsKey(dst)) {
+          try {
+            client.addConnection(connectionData.get(dst));
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          connectionData.remove(dst);
+        }
+      }
+    }}.start();
   }
   
   public int reachableNodes() {
@@ -81,7 +99,7 @@ public class Route {
     return peers;
   }
 
-  private void putRouteAndConnectionData(Request message, Connection connection) {
+  private void putRouteAndConnectionData(FishMessage message, Connection connection) {
     routes.put(message.getSource(), connection.getRemoteIdentity());
     bestRouteTTL.put(message.getSource(), message.getTtl());
     if (message.getSource() != connection.getRemoteIdentity() && 
@@ -90,7 +108,7 @@ public class Route {
     }
   }
   
-  public boolean learn(Connection connection, Request message) {
+  public boolean learn(Connection connection, FishMessage message) {
     if (connection.getRemoteIdentity() != message.getSource() &&
         !idToConnection.containsKey(message.getSource())) {
       if (!routes.containsKey(message.getSource())) {
@@ -142,22 +160,22 @@ public class Route {
     return idToConnection.containsKey(id) || routes.containsKey(id);
   }
 
-  private void broadCast(Request r, Connection sourceConnection) {
+  private void broadCast(FishMessage r, Connection sourceConnection) {
     for (Connection connection : idToConnection.values()) {
       if (connection.getRemoteIdentity() == r.getSource()) continue;
       if (sourceConnection == connection) continue;
       connection.send(r);
     }
   }
-  public void route(Request message) {
+  public void route(FishMessage message) {
     route(message, null);
   }
-  public void route(Request message, Connection sourceConnection) {
+  public void route(FishMessage message, Connection sourceConnection) {
     if (message.getTtl() <= 1) {
       System.err.println(toString() + ": TTL expired: \n" + message.toString());
       return;
     }
-    Request.Builder newMessageBuilder = reduceTTL(message);
+    FishMessage.Builder newMessageBuilder = reduceTTL(message);
     // Put connection data in each message.
     if (sourceConnection != null && 
         message.getSource() == sourceConnection.getRemoteIdentity()) {

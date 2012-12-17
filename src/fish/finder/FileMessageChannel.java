@@ -4,49 +4,31 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import fish.finder.proto.Message.FileEntry;
+import fish.finder.proto.Message.FishMessage;
 import fish.finder.proto.Message.MessageType;
-import fish.finder.proto.Message.Request;
 import fish.finder.proto.Message.RequestFilePart;
 
-public class FileMessageChannel implements Runnable {
+public class FileMessageChannel extends FileChannel {
 
+  public FileMessageChannel(Client client, FileEntry remoteFile,
+      String directory) {
+    super(client, remoteFile, directory);
+  }
   public static boolean DEBUG = false;
-  private String directory;
-  private FileEntry remoteFile;
-  private Client client;
   private long progress;
   private File file;
 
   private FileOutputStream out;
   private boolean successFul = false;
   private boolean abort = false;
-  
-  public static final int MAX_CHUNK = 32000;
-
-  public String getDirectory() {
-    return directory;
-  }
-
-  public FileEntry getRemoteFile() {
-    return remoteFile;
-  }
-
-  public FileMessageChannel(Client client,
-      FileEntry remoteFile, String directory) {
-    this.client = client;
-    this.remoteFile = remoteFile;
-    this.directory = directory;
-  }
 
   private void requestChunk() {
     RequestFilePart fileRequest = 
         RequestFilePart.newBuilder().setFile(remoteFile)
             .setFromByte(progress)
-            .setToByte(progress + MAX_CHUNK).build();
-    Request r = client.createRequest(MessageType.REQUEST_FILE_PART)
+            .setToByte(progress + MAX_CHUNK_SIZE).build();
+    FishMessage r = client.createRequest(MessageType.REQUEST_FILE_PART)
         .setDestination(remoteFile.getHost())
         .setData(fileRequest.toByteString())
         .build();
@@ -59,7 +41,7 @@ public class FileMessageChannel implements Runnable {
                        ":" + r.getToByte() + " ?");
   }
 
-  public synchronized boolean receiveChunk(Request message) {
+  public synchronized boolean receiveChunk(FishMessage message) {
     try {
       if (DEBUG) {
         System.out.println(this.toString() + ": Received chunk: \n" + message);
@@ -72,7 +54,7 @@ public class FileMessageChannel implements Runnable {
     }
   }
   
-  private boolean receiveChunkInternal(Request message) throws IOException {
+  private boolean receiveChunkInternal(FishMessage message) throws IOException {
    // System.out.println("Chunk data size:"+message.getData().size());
     RequestFilePart r = RequestFilePart.parseFrom(message.getData());
     if (r.getFile().getName().equals(remoteFile.getName()) &&
@@ -103,7 +85,7 @@ public class FileMessageChannel implements Runnable {
   public boolean wasSuccessFul() {
     return successFul && !abort;
   }
-  public String getFullFileName() {
+  public String getFullLocalFileName() {
     return file.getAbsolutePath();
   }
   private void runTransfer() throws IOException, InterruptedException {
@@ -147,9 +129,8 @@ public class FileMessageChannel implements Runnable {
   }
 
   public String toString() {
-    return getFullFileName();
+    return getFullLocalFileName();
   }
-  
   public void startTransfer() {
     file = new File(directory, remoteFile.getName());
     if (file.exists()) {
