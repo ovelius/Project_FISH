@@ -190,6 +190,9 @@ public class Connection implements Runnable {
         message.getDestination() != client.getLocalIdentity()) {
       client.getRoute().route(message, this);
     } else {
+
+      client.getRoute().learnConnectionData(message, this);
+
       switch (message.getType().getNumber()) {
         case MessageType.PING_VALUE:
           response = client.createRequest(MessageType.PONG)

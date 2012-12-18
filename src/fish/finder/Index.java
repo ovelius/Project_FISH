@@ -33,6 +33,10 @@ public class Index implements Runnable {
 
   private ArrayList<String> indexQueue = new ArrayList<String>();
 
+  public static String getFileKey(FileEntry e) {
+    return e.getSize() + "" + e.getHash();
+  }
+  
   public ArrayList<FileEntry> search(String q) {
     ArrayList<FileEntry> results = new ArrayList<FileEntry>();
     q = q.toUpperCase();
@@ -129,8 +133,7 @@ public class Index implements Runnable {
   private RequestFilePart requestFileChunkInternal(RequestFilePart request) throws IOException {
     FileEntry localFile = request.getFile();
     int length = (int)(request.getToByte() - request.getFromByte());
-    String hkey = localFile.getName() + localFile.getHash();
-    String absPath = fileHashNameToPath.get(hkey);
+    String absPath = fileHashNameToPath.get(getFileKey(localFile));
     if (absPath != null) {
       RandomAccessFile in = new RandomAccessFile(absPath, "r");
       in.seek(request.getFromByte());
@@ -172,8 +175,7 @@ public class Index implements Runnable {
               .setHash(hash)
               .build();
           fileNameToEntry.put(in.getAbsolutePath(), entry);
-          String hkey = entry.getName()+hash;
-          fileHashNameToPath.put(hkey, in.getAbsolutePath());
+          fileHashNameToPath.put(getFileKey(entry), in.getAbsolutePath());
           totalFileSize += in.length();
           addToIndex(in);
         }

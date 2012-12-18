@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import fish.finder.gui.SearchResultModel;
 import fish.finder.proto.Message.ConnectionData;
@@ -38,10 +39,10 @@ public class Client implements Runnable {
   private Index index;
   private ServerSocket socket;
   private Route route;
-  private HashMap<Long, FileChannel> fileChannels = 
-      new HashMap<Long, FileChannel>();
+  private HashMap<String, FileChannel> fileChannels = 
+      new HashMap<String, FileChannel>();
   
-  public HashMap<Long, FileChannel> getFileChannels() {
+  public HashMap<String, FileChannel> getFileChannels() {
     return fileChannels;
   }
 
@@ -89,9 +90,9 @@ public class Client implements Runnable {
 
   public String downloadFile(FileEntry f, String dir) {
     synchronized (fileChannels) {
-      long from = f.getHost();
+      String fileKey = Index.getFileKey(f);
       FileChannel channel = new FileMessageChannel(this, f, dir);
-      fileChannels.put(from, channel);
+      fileChannels.put(fileKey, channel);
       channel.startTransfer();
       return channel.getFullLocalFileName();
     }
@@ -102,9 +103,15 @@ public class Client implements Runnable {
   }
   
   public void processFileChunk(FishMessage message) {
-    long from = message.getSource();
-    FileChannel channel = fileChannels.get(from);
-    channel.receiveChunk(message);
+    RequestFilePart r;
+    try {
+      r = RequestFilePart.parseFrom(message.getData());
+      FileChannel channel = fileChannels.get(Index.getFileKey(r.getFile()));
+      channel.receiveChunk(r);
+    } catch (InvalidProtocolBufferException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
   
   public Long connectoTo(Client other) throws IOException {

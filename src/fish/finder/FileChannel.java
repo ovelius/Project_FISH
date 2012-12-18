@@ -2,6 +2,7 @@ package fish.finder;
 
 import fish.finder.proto.Message.FileEntry;
 import fish.finder.proto.Message.FishMessage;
+import fish.finder.proto.Message.RequestFilePart;
 
 public abstract class FileChannel implements Runnable {
   protected String directory;
@@ -29,7 +30,7 @@ public abstract class FileChannel implements Runnable {
     return client;
   }
   
-  public abstract boolean receiveChunk(FishMessage message);
+  public abstract boolean receiveChunk(RequestFilePart message);
   public abstract boolean active();
   public abstract double getPercentComplete();
   public abstract boolean wasSuccessFul();

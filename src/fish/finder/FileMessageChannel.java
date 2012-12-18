@@ -41,7 +41,7 @@ public class FileMessageChannel extends FileChannel {
                        ":" + r.getToByte() + " ?");
   }
 
-  public synchronized boolean receiveChunk(FishMessage message) {
+  public synchronized boolean receiveChunk(RequestFilePart message) {
     try {
       if (DEBUG) {
         System.out.println(this.toString() + ": Received chunk: \n" + message);
@@ -54,9 +54,8 @@ public class FileMessageChannel extends FileChannel {
     }
   }
   
-  private boolean receiveChunkInternal(FishMessage message) throws IOException {
+  private boolean receiveChunkInternal(RequestFilePart r) throws IOException {
    // System.out.println("Chunk data size:"+message.getData().size());
-    RequestFilePart r = RequestFilePart.parseFrom(message.getData());
     if (r.getFile().getName().equals(remoteFile.getName()) &&
         r.getFile().getHash().equals(remoteFile.getHash())) {
       if (r.getFromByte() == progress) {

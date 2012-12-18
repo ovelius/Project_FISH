@@ -2,7 +2,6 @@ package fish.finder;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,7 +9,7 @@ import java.util.HashSet;
 
 import fish.finder.proto.Message.ConnectionData;
 import fish.finder.proto.Message.FishMessage;
-import fish.finder.proto.Message.MessageType;
+
 
 public class Route {
 
@@ -71,6 +70,7 @@ public class Route {
         routes.remove(dst);
         if (connectionData.containsKey(dst)) {
           try {
+            System.err.println("Trying to establish direct connection to " + connectionData.get(dst));
             client.addConnection(connectionData.get(dst));
           } catch (IOException e) {
             e.printStackTrace();
@@ -102,10 +102,22 @@ public class Route {
   private void putRouteAndConnectionData(FishMessage message, Connection connection) {
     routes.put(message.getSource(), connection.getRemoteIdentity());
     bestRouteTTL.put(message.getSource(), message.getTtl());
+    learnConnectionData(message, connection);
+  }
+  
+  public void learnConnectionData(FishMessage message, Connection connection) {
     if (message.getSource() != connection.getRemoteIdentity() && 
         message.hasSourceConnection()) {
-      connectionData.put(message.getSource(), connection.getConnectionData());
+      connectionData.put(message.getSource(), message.getSourceConnection());
     }
+  }
+  
+  public String getConnectionData(Long dst) {
+    ConnectionData d = connectionData.get(dst);
+    if (d != null) {
+      return d.getHost()+":"+d.getPort();
+    }
+    return null;
   }
   
   public boolean learn(Connection connection, FishMessage message) {
@@ -177,7 +189,7 @@ public class Route {
     }
     FishMessage.Builder newMessageBuilder = reduceTTL(message);
     // Put connection data in each message.
-    if (sourceConnection != null && 
+    if (sourceConnection != null && !sourceConnection.isHost() &&
         message.getSource() == sourceConnection.getRemoteIdentity()) {
       newMessageBuilder
           .setSourceConnection(sourceConnection.getConnectionData());

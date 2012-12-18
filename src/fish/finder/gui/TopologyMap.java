@@ -19,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 import fish.finder.Client;
 import fish.finder.Connection;
 import fish.finder.Route;
+import fish.finder.proto.Message.ConnectionData;
 
 public class TopologyMap extends JFrame implements Runnable {
 
@@ -104,8 +105,9 @@ public class TopologyMap extends JFrame implements Runnable {
       int py = y + (int)(basicScale*2*Math.sin(angle));
       int px = x + (int)(basicScale*4*Math.cos(angle));
       drawArrow(g, x, y, px, py);
+      String cdata = client.getRoute().getConnectionData(id);
       drawNode(g, px, py, 2*basicScale, basicScale,
-          new Color(125, 0, 0), ""+id, null);
+          new Color(125, 0, 0), ""+id, cdata);
       ++peerCount;
       drawPeersRecursive(g, id, px, py);
     }

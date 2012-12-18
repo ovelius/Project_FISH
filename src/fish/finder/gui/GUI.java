@@ -303,15 +303,10 @@ public class GUI extends JFrame implements Runnable {
           }
       }
     });
-    //URL i = GUI.class.getResource("/images/loading.gif");
-    //loader = new ImageIcon(i);
   }
 
   private JPanel createNewTransferPanel() {
     JPanel sampleTransfer = new JPanel();
-    int top = 10 + transferPanel.getComponentCount()*80;
-    sampleTransfer.setBounds(10, top, 389, 80);
-    transferPanel.add(sampleTransfer);
     sampleTransfer.setLayout(null);
     
     JProgressBar progressBar = new JProgressBar();
@@ -332,16 +327,19 @@ public class GUI extends JFrame implements Runnable {
     return sampleTransfer;
   }
   
-  private HashMap<Long, JPanel> transfers = new HashMap<Long, JPanel>();
-  private long lastUpdate = System.currentTimeMillis();
-  private HashMap<Long, Long> lastByteCount = new HashMap<Long, Long>();
-  private void modelFileChannels(HashMap<Long, FileChannel> channels) {
-    for (Long sender : channels.keySet()) {
-      FileChannel ch = channels.get(sender);
-      JPanel transfer = transfers.get(sender);
+  private HashMap<String, JPanel> transfers = new HashMap<String, JPanel>();
+
+
+  private void modelFileChannels(HashMap<String, FileChannel> channels) {
+    for (String fileKey : channels.keySet()) {
+      FileChannel ch = channels.get(fileKey);
+      JPanel transfer = transfers.get(fileKey);
       if (transfer == null) {
         transfer = createNewTransferPanel();
-        transfers.put(sender, transfer);
+        transfers.put(fileKey, transfer);
+        int top = 10 + transferPanel.getComponentCount()*80;
+        transfer.setBounds(10, top, 389, 80);
+        transferPanel.add(transfer);
       }
       JLabel dst = (JLabel) transfer.getComponent(3);
       dst.setText("Destination folder:" + ch.getDirectory());
